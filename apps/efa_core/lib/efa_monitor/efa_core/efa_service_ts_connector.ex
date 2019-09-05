@@ -1,0 +1,65 @@
+defmodule EfaMonitor.EfaCore.EfaService.TransportService.ServiceConnector do
+  alias EfaMonitor.EfaCore.EfaService.TransportService.DepartureMonitorHttpRequest, as: DMRequest
+  alias EfaMonitor.EfaCore.EfaService.TransportService.Supervisor, as: EfaServiceSupervisor
+  use GenServer
+  require Logger
+  @service_config Application.get_env(:efa_core, :api_config)
+
+  ########### Client Apis
+
+  def send_request(type, transport_service, station_name) when is_binary(station_name) do
+    send_request(type, transport_service, station_name, 0)
+  end
+
+  def send_request(type, transport_service, station_name, timeOffset) do
+    GenServer.cast(
+      __MODULE__,
+      {type,{self(), transport_service, %DMRequest{name_dm: station_name, timeOffset: timeOffset}}}
+    )
+  end
+
+  ###########
+
+  def start_link([]) do
+    GenServer.start_link(
+      __MODULE__,
+      [],
+      name: __MODULE__
+    )
+  end
+
+  @impl true
+  def init([]) do
+    {:ok, []}
+  end
+
+  @impl true
+  def handle_cast({request_type, request = {from, transport_service, req = %DMRequest{}}}, state)
+      when is_pid(from) do
+    Logger.info("Got :request_dm from #{inspect(from)} req: #{inspect(request)}")
+
+    case find_service(transport_service) do
+      {:ok, pid} ->
+        GenServer.cast(pid, {from, request_type, req})
+        {:noreply, state}
+
+      {:error, some_error} ->
+        GenServer.cast(from, {request_type, transport_service, {:error, some_error}})
+        {:noreply, state}
+    end
+  end
+
+  defp find_service(service) do
+    case Process.whereis(service) do
+      pid when is_pid(pid) ->
+        {:ok, pid}
+
+      nil ->
+        if Map.has_key?(@service_config, service) do
+          EfaServiceSupervisor.start_child(service, @service_config[service])
+        else
+          {:error, :noservice}
+        end
+    end
+  end
+end
