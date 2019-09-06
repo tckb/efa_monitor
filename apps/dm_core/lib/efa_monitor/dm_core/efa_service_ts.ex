@@ -15,6 +15,7 @@ defmodule EfaMonitor.DmCore.TransportService do
   @type dm_response ::
           {:ok, map()}
           | {:error, :max_retries}
+          | {:error, :station_not_found}
           | {:error, {:station_not_found, list_of_suggestions :: list(String.t())}}
           | {:error, reason :: binary}
   alias EfaMonitor.DmCore.ServiceLine
@@ -57,6 +58,7 @@ defmodule EfaMonitor.DmCore.TransportService do
           )
         else
           Logger.warn("Max retries exceeded, ignoring this message  #{inspect(dm_req)}")
+          {:error, :max_retries}
         end
 
       _ ->
