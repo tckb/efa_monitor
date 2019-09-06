@@ -27,7 +27,8 @@ defmodule EfaMonitor.DmCore.TransportService.DepartureMonitorHttpRequest do
             includeCompleteStopSeq: 0,
             useRealtime: 1,
             outputFormat: "json",
-            lineRestriction: 400
+            lineRestriction: 400,
+            retry_count: 5
 
   @doc """
   encodes the current request into url-encoded string
@@ -36,6 +37,7 @@ defmodule EfaMonitor.DmCore.TransportService.DepartureMonitorHttpRequest do
   def encode(req = %DepartureMonitorHttpRequest{}) do
     req
     |> Map.from_struct()
+    |> Enum.filter(fn {k, _} -> k != "retry_count" end)
     |> Enum.map(fn {k, v} ->
       "#{k}=#{v}"
       |> URI.encode()

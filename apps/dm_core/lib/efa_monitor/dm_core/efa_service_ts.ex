@@ -44,15 +44,30 @@ defmodule EfaMonitor.DmCore.TransportService do
   end
 
   @impl true
-  def handle_cast({from, :raw, request = %DMRequest{}}, state) when is_pid(from) do
+  def handle_cast({dm_req = from, :raw, request = %DMRequest{}}, state) when is_pid(from) do
     state = %{state | requests: [from | state.requests]}
     {state, resp} = process_request(state, request)
-    GenServer.cast(from, {:raw, state.service_name, resp})
+
+    case resp do
+      {:error, :retry} ->
+        if request.retry_count > 0 do
+          GenServer.cast(
+            self(),
+            {from, :raw, %{request | retry_count: request.retry_count - 1}}
+          )
+        else
+          Logger.warn("Max retries exceeded, ignoring this message  #{inspect(dm_req)}")
+        end
+
+      _ ->
+        GenServer.cast(from, {:raw, state.service_name, resp})
+    end
+
     {:noreply, state}
   end
 
   @impl true
-  def handle_cast({from, :lines, request = %DMRequest{}}, state) when is_pid(from) do
+  def handle_cast(dm_req = {from, :lines, request = %DMRequest{}}, state) when is_pid(from) do
     state = %{state | requests: [from | state.requests]}
 
     {state, resp} = process_request(state, request)
@@ -64,10 +79,13 @@ defmodule EfaMonitor.DmCore.TransportService do
 
           try do
             case get_lines(rawdata["dm"]["points"], rawdata["departureList"]) do
-              {:error, station_suggestions} ->
+              {:error, station_suggestions} when is_list(station_suggestions) ->
                 {:error, :station_not_found, station_suggestions}
 
-              lines ->
+              {:error, some_error} ->
+                {:error, some_error}
+
+              {:ok, lines} ->
                 {:ok,
                  %{
                    station_name: rawdata["dm"]["points"]["point"]["name"],
@@ -81,11 +99,26 @@ defmodule EfaMonitor.DmCore.TransportService do
               {:error, :station_not_found}
           end
 
+        {:error, :retry} ->
+          if request.retry_count > 0 do
+            GenServer.cast(
+              self(),
+              {from, :lines, %{request | retry_count: request.retry_count - 1}}
+            )
+          else
+            Logger.warn("Max retries exceeded, ignoring this message  #{inspect(dm_req)}")
+          end
+
+          nil
+
         {:error, some_error} ->
           {:error, some_error}
       end
 
-    GenServer.cast(from, {:lines, state.service_name, resp})
+    if resp != nil do
+      GenServer.cast(from, {:lines, state.service_name, resp})
+    end
+
     {:noreply, state}
   end
 
@@ -102,13 +135,21 @@ defmodule EfaMonitor.DmCore.TransportService do
   end
 
   @impl true
+  def handle_info(message, state = %{requests: []}) do
+    case message do
+      {:mojito_response, nil, {:error, some_error}} ->
+        Logger.error("Got error #{some_error}")
+        {:noreply, state}
+    end
+  end
+
+  @impl true
   def handle_info(message, state) do
-    Logger.info(inspect(state))
     [from | remain] = state.requests
     state = %{state | requests: remain}
 
     case message do
-      {:mojito_response, nil, {:error, :closed}} ->
+      {:mojito_response, nil, {:error, _}} ->
         GenServer.cast(from, {:raw, state.service_name, {:error, :retry}})
         {:noreply, state}
     end
@@ -146,25 +187,34 @@ defmodule EfaMonitor.DmCore.TransportService do
     {state, resp}
   end
 
+  defp get_lines(result_points, lines) when is_map(result_points) and not is_nil(lines) do
+    {:ok,
+     lines
+     |> Enum.map(&ServiceLine.to_service_line/1)
+     |> Enum.sort(fn l1, l2 ->
+       Timex.compare(l1.line_arrival_time_actual, l2.line_arrival_time_actual, :minutes) < 0
+     end)}
+  end
+
   defp get_lines(result_points, _) when is_list(result_points) do
     {:error,
      result_points
      |> Enum.map(fn point -> point["name"] end)}
   end
 
-  defp get_lines(result_points, lines) when is_map(result_points) do
-    lines
-    |> Enum.map(&ServiceLine.to_service_line/1)
-    |> Enum.sort(fn l1, l2 ->
-      Timex.compare(l1.line_arrival_time_actual, l2.line_arrival_time_actual, :minutes) < 0
-    end)
+  defp get_lines(_, _) do
+    {:error, :station_not_found}
   end
 
-  defp get_service_alerts(alerts) when not is_nil(alerts) do
-    Logger.debug("got alert: #{inspect(alerts)}")
+  defp get_service_alerts(alert) when not is_nil(alert) and is_map(alert) do
+    if alert["infoLinkText"] == nil do
+      Logger.debug("got alert: #{inspect(alert)}")
+    end
 
-    "#{alerts["info"]["infoLinkText"]} - #{alerts["info"]["infoText"]["subject"]} -  #{
-      alerts["info"]["infoText"]["content"]
+    alert_info = alert["infoText"]
+
+    "#{alert["infoLinkText"]} ++ #{alert_info["subject"]} ++ #{alert_info["content"]} ++ #{
+      alert_info["additionalText"]
     }"
   end
 
