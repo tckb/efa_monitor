@@ -32,7 +32,14 @@ defmodule EfaMonitor.DmCore.TransportService do
 
   @impl true
   def init({service_name, scheme, host, path}) do
-    state = %{api_path: path, scheme: scheme, host: host, service_name: service_name}
+    state = %{
+      api_path: path,
+      scheme: scheme,
+      host: host,
+      service_name: service_name,
+      requests: []
+    }
+
     {:ok, state}
   end
 
@@ -53,7 +60,13 @@ defmodule EfaMonitor.DmCore.TransportService do
     resp =
       case resp do
         {:ok, rawdata} ->
-          get_lines(rawdata["dm"]["points"], rawdata["departureList"])
+          Logger.debug("received response: #{inspect(rawdata["dm"])}")
+
+          %{
+            station_name: rawdata["dm"]["points"]["point"]["name"],
+            station_service_alerts: get_service_alerts(rawdata["dm"]["points"]["point"]["infos"]),
+            station_lines: get_lines(rawdata["dm"]["points"], rawdata["departureList"])
+          }
 
         {:error, some_error} ->
           {:error, some_error}
@@ -101,7 +114,6 @@ defmodule EfaMonitor.DmCore.TransportService do
              ]
            ) do
         {:ok, resp = %Mojito.Response{status_code: 200}} ->
-          Logger.debug("received response #{inspect(resp)}")
           {:ok, Jason.decode!(resp.body)}
 
         {:ok, resp = %Mojito.Response{}} ->
@@ -140,4 +152,14 @@ defmodule EfaMonitor.DmCore.TransportService do
       end)
     }
   end
+
+  defp get_service_alerts(alerts) when not is_nil(alerts) do
+    Logger.debug("got alert: #{inspect(alerts)}")
+
+    "#{alerts["info"]["infoLinkText"]} - #{alerts["info"]["infoText"]["subject"]} -  #{
+      alerts["info"]["infoText"]["content"]
+    }"
+  end
+
+  defp get_service_alerts(_), do: ""
 end

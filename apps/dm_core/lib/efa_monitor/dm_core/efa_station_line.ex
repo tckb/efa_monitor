@@ -54,21 +54,21 @@ defmodule EfaMonitor.DmCore.ServiceLine do
   converts the departure line into the serving line
   """
   @spec to_service_line(departure_line :: map()) :: __MODULE__.t()
-  def to_service_line(departure_line) when not is_nil(departure_line) do
+  def to_service_line(departure_line) do
     serving_line = departure_line["servingLine"]
 
     datetime =
-      case serving_line["realTime"] do
-        "1" -> serving_line["realDateTime"]
-        rt when rt in ["0", nil] -> serving_line["dateTime"]
+      case departure_line["realTime"] do
+        "1" -> departure_line["realDateTime"]
+        rt when rt in ["0", nil] -> departure_line["dateTime"]
       end
 
     arrival_time =
-      with year when year > 0 <- datetime["year"] |> String.to_integer(),
-           month when month > 0 <- datetime["month"] |> String.to_integer(),
-           day when day > 0 <- datetime["day"] |> String.to_integer(),
-           hour when hour >= 0 <- datetime["hour"] |> String.to_integer(),
-           minute when minute >= 0 <- datetime["minute"] |> String.to_integer() do
+      with year when year > 0 <- String.to_integer(datetime["year"]),
+           month when month > 0 <- String.to_integer(datetime["month"]),
+           day when day > 0 <- String.to_integer(datetime["day"]),
+           hour when hour >= 0 <- String.to_integer(datetime["hour"]),
+           minute when minute >= 0 <- String.to_integer(datetime["minute"]) do
         Timex.to_datetime({{year, month, day}, {hour, minute, 0}}, :local)
       else
         _ ->
@@ -103,9 +103,10 @@ defmodule EfaMonitor.DmCore.ServiceLine do
     }
   rescue
     some_error ->
-      Logger.error(fn -> "Error while conversion #{inspect(some_error)}" end)
+      Logger.error(fn ->
+        "Error while conversion #{inspect(some_error)} for input #{inspect(departure_line)}"
+      end)
+
       %__MODULE__{}
   end
-
-  def get_line(_), do: %__MODULE__{}
 end
