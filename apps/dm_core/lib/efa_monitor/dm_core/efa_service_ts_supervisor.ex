@@ -1,4 +1,5 @@
-defmodule EfaMonitor.EfaCore.EfaService.TransportService.Supervisor do
+defmodule EfaMonitor.DmCore.EfaService.TransportService.Supervisor do
+  @moduledoc false
   use DynamicSupervisor
 
   def start_link(init_arg) do
@@ -6,7 +7,7 @@ defmodule EfaMonitor.EfaCore.EfaService.TransportService.Supervisor do
   end
 
   def start_child(child_name, params) do
-    spec = {EfaMonitor.EfaCore.EfaService.TransportService, {child_name, params}}
+    spec = {EfaMonitor.DmCore.EfaService.TransportService, {child_name, params}}
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
 

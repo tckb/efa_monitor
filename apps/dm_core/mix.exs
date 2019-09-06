@@ -1,9 +1,10 @@
-defmodule EfaMonitor.EfaCore.MixProject do
+defmodule EfaMonitor.DmCore.MixProject do
+  @moduledoc false
   use Mix.Project
 
   def project do
     [
-      app: :efa_core,
+      app: :dm_core,
       version: "0.1.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
@@ -11,7 +12,8 @@ defmodule EfaMonitor.EfaCore.MixProject do
       lockfile: "../../mix.lock",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
@@ -19,7 +21,7 @@ defmodule EfaMonitor.EfaCore.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {EfaMonitor.EfaCore.Application, []}
+      mod: {EfaMonitor.DmCore.Application, []}
     ]
   end
 

@@ -1,5 +1,8 @@
-defmodule EfaMonitor.EfaCore.EfaService.TransportService.DepartureMonitorHttpRequest do
-  alias EfaMonitor.EfaCore.EfaService.TransportService.DepartureMonitorHttpRequest
+defmodule EfaMonitor.DmCore.EfaService.TransportService.DepartureMonitorHttpRequest do
+  @moduledoc """
+  the departure monitoring request
+  """
+  alias EfaMonitor.DmCore.EfaService.TransportService.DepartureMonitorHttpRequest
 
   defstruct name_dm: nil,
             timeOffset: 0,
@@ -13,6 +16,10 @@ defmodule EfaMonitor.EfaCore.EfaService.TransportService.DepartureMonitorHttpReq
             outputFormat: "json",
             lineRestriction: 400
 
+  @doc """
+  encodes the current request into url-encoded string
+  """
+  @spec encode(DepartureMonitorHttpRequest.t()) :: binary
   def encode(req = %DepartureMonitorHttpRequest{}) do
     req
     |> Map.from_struct()

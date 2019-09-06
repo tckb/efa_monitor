@@ -1,5 +1,5 @@
-defmodule EfaMonitor.EfaCore.EfaService.ServiceLine do
-  alias EfaMonitor.EfaCore.EfaService.ServiceLine
+defmodule EfaMonitor.DmCore.EfaService.ServiceLine do
+  alias EfaMonitor.DmCore.EfaService.ServiceLine
   require Logger
 
   @transport_types %{

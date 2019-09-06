@@ -1,20 +1,29 @@
-defmodule EfaMonitor.EfaCore.EfaService.TransportService.ServiceConnector do
-  alias EfaMonitor.EfaCore.EfaService.TransportService.DepartureMonitorHttpRequest, as: DMRequest
-  alias EfaMonitor.EfaCore.EfaService.TransportService.Supervisor, as: EfaServiceSupervisor
+defmodule EfaMonitor.DmCore.EfaService.TransportService.ServiceConnector do
+  @moduledoc """
+  The main enttypooint to the efa core. This is the mains service which is responsible to connect and dispatch the messages to the corresponding transport service process. The supported transport services are listed in the configuration
+  """
+  alias EfaMonitor.DmCore.EfaService.TransportService.DepartureMonitorHttpRequest, as: DMRequest
+  alias EfaMonitor.DmCore.EfaService.TransportService.Supervisor, as: EfaServiceSupervisor
   use GenServer
   require Logger
-  @service_config Application.get_env(:efa_core, :api_config)
+  @service_config Application.get_env(:dm_core, :api)
 
-  ########### Client Apis
+  @type request_type :: {:raw, :lines}
 
+  @doc """
+  sends the request  to the corresponding transport service
+  """
+  @spec send_request(request_type, atom(), binary) :: :ok
   def send_request(type, transport_service, station_name) when is_binary(station_name) do
     send_request(type, transport_service, station_name, 0)
   end
 
+  @spec send_request(request_type, atom(), binary, integer()) :: :ok
   def send_request(type, transport_service, station_name, timeOffset) do
     GenServer.cast(
       __MODULE__,
-      {type,{self(), transport_service, %DMRequest{name_dm: station_name, timeOffset: timeOffset}}}
+      {type,
+       {self(), transport_service, %DMRequest{name_dm: station_name, timeOffset: timeOffset}}}
     )
   end
 
@@ -56,7 +65,11 @@ defmodule EfaMonitor.EfaCore.EfaService.TransportService.ServiceConnector do
 
       nil ->
         if Map.has_key?(@service_config, service) do
-          EfaServiceSupervisor.start_child(service, @service_config[service])
+          EfaServiceSupervisor.start_child(
+            service,
+            {@service_config[service].scheme, @service_config[service].host,
+             @service_config[service].apis.dm}
+          )
         else
           {:error, :noservice}
         end

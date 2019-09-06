@@ -1,6 +1,6 @@
-defmodule EfaMonitor.EfaCore.EfaService.TransportService do
-  alias EfaMonitor.EfaCore.EfaService.TransportService.DepartureMonitorHttpRequest, as: DMRequest
-  alias EfaMonitor.EfaCore.EfaService.ServiceLine
+defmodule EfaMonitor.DmCore.EfaService.TransportService do
+  alias EfaMonitor.DmCore.EfaService.TransportService.DepartureMonitorHttpRequest, as: DMRequest
+  alias EfaMonitor.DmCore.EfaService.ServiceLine
   use GenServer
   require Logger
 
@@ -34,13 +34,14 @@ defmodule EfaMonitor.EfaCore.EfaService.TransportService do
 
     {state, resp} = process_request(state, request)
 
-    resp = case resp do
-      {:ok, rawdata} ->
-        get_lines(rawdata["dm"]["points"], rawdata["departureList"])
+    resp =
+      case resp do
+        {:ok, rawdata} ->
+          get_lines(rawdata["dm"]["points"], rawdata["departureList"])
 
-      {something_else} ->
-        something_else
-    end
+        {:error, some_error} ->
+          {:error, some_error}
+      end
 
     GenServer.cast(from, {:lines, state.service_name, resp})
     {:noreply, state}
@@ -76,7 +77,7 @@ defmodule EfaMonitor.EfaCore.EfaService.TransportService do
           {:ok, Jason.decode!(resp.body)}
 
         {:ok, resp = %Mojito.Response{}} ->
-          {:error, "Unexpected status code received: #{resp.status}"}
+          {:error, "Unexpected status code received: #{resp.status_code}"}
 
         {:error, error = %Mojito.Error{reason: :timeout}} ->
           Logger.error(fn -> "#{inspect(error)} occurred while sending request" end)
@@ -106,11 +107,9 @@ defmodule EfaMonitor.EfaCore.EfaService.TransportService do
       :ok,
       lines
       |> Enum.map(&ServiceLine.get_line/1)
-      |> Enum.sort(
-           fn l1, l2 ->
-             Timex.compare(l1.line_arrival_time_actual, l2.line_arrival_time_actual, :minutes) < 0
-           end
-         )
+      |> Enum.sort(fn l1, l2 ->
+        Timex.compare(l1.line_arrival_time_actual, l2.line_arrival_time_actual, :minutes) < 0
+      end)
     }
   end
 end
