@@ -1,21 +1,514 @@
-# EfaMonitor.DmCore
+# DmCore 
+This is the core application of the umbrella application. The `dm_core` application is responsible for sending out the _departure monitor_ (dm) requests to the corresponding transportation services and will send a message back to the sender as soon a response is recieved. 
 
-**TODO: Add description**
+For more detailed documentation and usage please consult [docs](../../doc)
 
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `efa_core` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:efa_core, "~> 0.1.0"}
-  ]
-end
+## Sample usage
+```bash
+$ MIX_ENV=dev iex -S mix
+iex(2)> alias EfaMonitor.DmCore.TransportService.ServiceConnector      EfaMonitor.DmCore.TransportService.ServiceConnector
+iex(51)> ServiceConnector.send_request(:lines, :vvs, "Stuttgart Hbf") 
+iex(53)> flush                                                       
+{:"$gen_cast",
+ {:lines, :vvs,
+  {:error, :station_not_found,
+   ["Stuttgart, Stuttgart Hauptbahnhof (oben)",
+    "Stuttgart, Stuttgart Hauptbahnhof (tief)",
+    "Stuttgart, Stuttgart Hbf (A.-Klett-Pl.)"]}}}
+iex(55)> ServiceConnector.send_request(:lines, :vvs, "Stuttgart, Stuttgart Hauptbahnhof (tief)")
+iex(57)> flush
+{:"$gen_cast",
+ {:lines, :vvs,
+  {:ok,
+   %{
+     station_lines: [
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 3",
+         line_arrival_platform_number: "3",
+         line_arrival_time: #DateTime<2019-09-06 22:04:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:04:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Stammheim",
+         line_info: "",
+         line_name: "Stadtbahn",
+         line_number: "U15",
+         line_start: "Ruhbank (Fernsehturm)",
+         line_type: "Stadtbahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 101",
+         line_arrival_platform_number: "101",
+         line_arrival_time: #DateTime<2019-09-06 22:03:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:04:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 1,
+         line_direction: "Schwabstraße",
+         line_info: "",
+         line_name: "S-Bahn",
+         line_number: "S5",
+         line_start: "Bietigheim-Bissingen",
+         line_type: "S-Bahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 4",
+         line_arrival_platform_number: "4",
+         line_arrival_time: #DateTime<2019-09-06 22:06:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:06:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Ruhbank (Fernsehturm)",
+         line_info: "",
+         line_name: "Stadtbahn",
+         line_number: "U15",
+         line_start: "Stammheim",
+         line_type: "Stadtbahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "",
+         line_arrival_platform_number: "5",
+         line_arrival_time: #DateTime<2019-09-06 22:02:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:06:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 4,
+         line_direction: "Killesberg",
+         line_info: "Terminänderung: Stuttgart-Nord: Haltestelle Kunstakademie verlegt ++ Linien 44, N2 ++ Terminänderung: Seit Montag, 29. Juli 2019 ab 07:00 Uhr bis nun noch voraussichtlich Freitag, 20. September 2019 kann die Haltestelle Stuttgart, Kunstakademie von den Buslinien 44 und N2 aufgrund von Bauarbeiten nicht angefahren werden.\n \nErsatzhaltestellen: \n- Die Haltestelle Kunstakademie Richtung Killesberg wird an den rechten Fahrbahnrand in der Birkenwaldstraße, vor Einmündung Friedrich-Ebert-Straße verlegt. \n- Die Haltestelle Kunstakademie Richtung Westbahnhof wird in die Straße Am Kochenhof, vor Gebäude 3 verlegt. ++ Die beschriebenen Fahrplanänderungen sind <b>nicht in EFA</b> erfasst. ++++ Stuttgart: Haltestelle Leipziger Platz verlegt ++ Linien 44, N2 ++ Von Donnerstag, 15. August 2019 ab 08:00 Uhr bis voraussichtlich Dienstag, 10. September 2019 kann die Haltestelle Stuttgart, Leipziger Platz von den Buslinien 44 und N2 aufgrund von Bauarbeiten nicht angefahren werden. \n\nErsatzhaltestelle:  \n- Die Haltestelle Leipziger Platz Richtung Killesberg wird entgegen der Fahrtrichtung zu einer Ersatzhaltestelle vor Gebäude  Rotenwaldstraße 41 zurückverlegt. \n- Die Haltestelle Leipziger Platz Richtung Westbahnhof wird zur Haltestelle Seyfferstraße Richtung Westbahnhof verlegt. ++ ",
+         line_name: "Bus",
+         line_number: "44",
+         line_start: "Westbahnhof (Schleife)",
+         line_type: "Bus"
+       },
+       %EfaMonitor.DmCore.ServiceLine{ 
+         line_arrival_platform_name: "Gleis 3",
+         line_arrival_platform_number: "3",
+         line_arrival_time: #DateTime<2019-09-06 22:07:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:07:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Gerlingen",
+         line_info: "",
+         line_name: "Stadtbahn", 
+         line_number: "U6",
+         line_start: "Fasanenhof Schelmenwasen",
+         line_type: "Stadtbahn"
+       }, 
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 102",
+         line_arrival_platform_number: "102",
+         line_arrival_time: #DateTime<2019-09-06 22:05:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:07:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 2,
+         line_direction: "Schorndorf",
+         line_info: "Vaihingen: Fahrplanänderungen wegen Bauarbeiten, Bauphase 3 ++ Linien IC, R7, S1, S2, S3 ++ Von Freitag, 30. August 04:30 Uhr bis Montag, 16. September 2019 04:30 Uhr werden in Vaihingen und Rohr Gleise und Weichen in der Bauphase 3 ausgetauscht. Es kommt zu folgenden Fahrplanänderungen:\n\nVom 30. August bis 13. September (nur montags bis freitags) fährt die S1 nur alle 30 Minuten zwischen Kirchheim (T) und Herrenberg. Die Zwischentaktzüge, die den 15-Minuten-Takt bilden, fahren nur zwischen Plochingen und Vaihingen.\n \nAn den Wochenenden 31. August 01:30 Uhr bis 2. September 04:30 Uhr und 7. September 01:30 bis 9. September 04:30 Uhr wird die Strecke Rohr - Böblingen komplett gesperrt. Die S1 fährt nur zwischen Kirchheim (T) und Vaihingen. Zwischen Vaihingen und Böblingen, im Spät- und Nachtverkehr bis Herrenberg, werden Ersatzbusse eingesetzt. Die Ersatzbusse halten nicht in Rohr. Statt am Goldberg halten die Busse in Böblingen Freibad. Es verkehrt eine neue Linie S61 Herrenberg - Böblingen - Renningen bzw. Schwabstraße, in Abschnitt Herrenberg - Böblingen in den Fahrzeiten der S1, im Abschnitt Böblingen - Renningen bzw. Schwabstraße in den Fahrzeiten der S60. Bitte prüfen Sie vorab Ihre Verbindungen in der Fahrplanauskunft. Im Regionalverkehr entfallen die Züge der R7 zwischen Stuttgart Hbf und Böblingen, Ausnahme: der Zug Böblingen ab 19:21 Uhr wird umgeleitet und erreicht Stuttgart Hbf um 19:58 Uhr. Die IC-Züge werden zwischen Stuttgart Hbf und Böblingen umgeleitet. Dadurch verlängert sich die Fahrzeit um bis zu 30 Minuten.\n \nVom 14. September 01:30 Uhr bis 16. September 04:30 Uhr ist die Strecke Rohr - Flughafen/Messe nur eingleisig befahrbar. Die S2 fährt nur zwischen Schorndorf und Vaihingen. Die S3 wird durch die Baustellenlinie S30 ersetzt, diese fährt in den Fahrzeiten der S3 zwischen Backnang und Flughafen/Messe und wird bis Filderstadt verlängert. ++ Die beschriebenen Fahrplanänderungen sind <b>nicht in EFA</b> erfasst.",
+         line_name: "S-Bahn",
+         line_number: "S2",
+         line_start: "Filderstadt",
+         line_type: "S-Bahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "",
+         line_arrival_platform_number: "4",
+         line_arrival_time: #DateTime<2019-09-06 22:08:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:08:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Wagenburgstraße",
+         line_info: "Stuttgart: Haltestellenausfälle wegen Baumfällarbeiten ++ Linien 40, N2 ++ Aufgrund von Baumfällarbeiten werden die Linien 40 Richtung Wagenburgstraße und N2 Richtung Killesberg von Donnerstag, 5. September, 07:00 Uhr bis Samstag, 7. September, 19:00 Uhr umgeleitet.\n \nDie folgenden Haltestellen entfallen ersatzlos: \n\n\nLinie 40, nur Fahrtrichtung Wagenburgstraße: Haltestellen Geibelstraße, Kräherwald und Leibnizstraße\nLinie N2 Richtung Killesberg: Haltestellen Honoldweg, Fichtestraße, Gaußstraße, Leibnizstraße und Kräherwald ++ Die beschriebenen Fahrplanänderungen sind <b>nicht in EFA</b> erfasst. ++++ Stuttgart: Umleitung wegen Bauarbeiten ++ Linie 40 ++ Terminänderung: \nSeit  Donnerstag, 05. September 2019 ab 07:00 Uhr noch bis 07.09.2019, 12:00 Uhr wird die Buslinie 40 in Richtung Wagenburgstraße aufgrund von Bauarbeiten umgeleitet.\nDie Haltestellen Stuttgart, Nikolauspflege bis Stuttgart, Leibnizstraße können nicht angefahren werden. \nErsatzhaltestellen:  \n- Die Haltestelle Nikolauspflege in Fahrtrichtung Wagenburgstraße wird zu einer Ersatzhaltestelle in der Gaußstraße, auf Höhe Gebäude 111 verlegt. \n- Die Haltestelle Geibelstraße in Fahrtrichtung Wagenburgstraße wird zu einer Ersatzhaltestelle in der Gaußstraße, auf Höhe Gebäude 69 verlegt (Der Fußweg zu dieser Ersatzhaltestelle ist nicht barrierefrei)\n- Die Haltestellen Kräherwald und Leibnizstraße in Fahrtrichtung Wagenburgstraße werden zur Haltestelle Gaußstraße verlegt.\n\nAlternativ kann ab den entfalllenden Haltestellen jeweils der Bus der Gegenrichtung bis zur Haltestelle Botnanger Sattel genutzt werden und dort Richtung Hauptbahnhof - Wagenburgstraße umgestiegen werden.\n\nIn Fahrtrichtung Vogelsang fahren die Busse über die reguläre Strecke und bedienen alle Haltestellen wie gewohnt. ++ ",
+         line_name: "Bus",
+         line_number: "40",
+         line_start: "Vogelsang",
+         line_type: "Bus"
+       }, 
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 1",
+         line_arrival_platform_number: "1",
+         line_arrival_time: #DateTime<2019-09-06 22:08:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:08:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Vogelsang",
+         line_info: "Stuttgart-Mitte: Haltepunkte an der Haltestelle Börsenplatz verlegt ++ Linien U11, U14, U29 ++ Die Haltepositionen der Stadtbahnen werden ab Freitag, 12. Oktober 2018 bis auf weiteres verschoben. Grund dafür sind Bauarbeiten am Bahnsteig. Die Bahnen halten in den hinteren Bereichen der Haltestelle, die nicht von den Umbaumaßnahmen betroffen sind. ++ Die beschriebenen Fahrplanänderungen sind <b>nicht in EFA</b> erfasst.",
+         line_name: "Stadtbahn",
+         line_number: "U29",
+         line_start: "Hauptbf (A.-Klett-Pl.)",
+         line_type: "Stadtbahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 4",
+         line_arrival_platform_number: "4",
+         line_arrival_time: #DateTime<2019-09-06 22:08:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:09:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 1,
+         line_direction: "Fasanenhof Schelmenwasen",
+         line_info: "",
+         line_name: "Stadtbahn",
+         line_number: "U6",
+         line_start: "Gerlingen",
+         line_type: "Stadtbahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 102",
+         line_arrival_platform_number: "102",
+         line_arrival_time: #DateTime<2019-09-06 22:08:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:10:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 2,
+         line_direction: "Backnang",
+         line_info: "",
+         line_name: "S-Bahn",
+         line_number: "S4",
+         line_start: "Schwabstraße",
+         line_type: "S-Bahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 101",
+         line_arrival_platform_number: "101",
+         line_arrival_time: #DateTime<2019-09-06 22:05:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:10:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 5,
+         line_direction: "Herrenberg",
+         line_info: "Vaihingen: Fahrplanänderungen wegen Bauarbeiten, Bauphase 3 ++ Linien IC, R7, S1, S2, S3 ++ Von Freitag, 30. August 04:30 Uhr bis Montag, 16. September 2019 04:30 Uhr werden in Vaihingen und Rohr Gleise und Weichen in der Bauphase 3 ausgetauscht. Es kommt zu folgenden Fahrplanänderungen:\n\nVom 30. August bis 13. September (nur montags bis freitags) fährt die S1 nur alle 30 Minuten zwischen Kirchheim (T) und Herrenberg. Die Zwischentaktzüge, die den 15-Minuten-Takt bilden, fahren nur zwischen Plochingen und Vaihingen.\n \nAn den Wochenenden 31. August 01:30 Uhr bis 2. September 04:30 Uhr und 7. September 01:30 bis 9. September 04:30 Uhr wird die Strecke Rohr - Böblingen komplett gesperrt. Die S1 fährt nur zwischen Kirchheim (T) und Vaihingen. Zwischen Vaihingen und Böblingen, im Spät- und Nachtverkehr bis Herrenberg, werden Ersatzbusse eingesetzt. Die Ersatzbusse halten nicht in Rohr. Statt am Goldberg halten die Busse in Böblingen Freibad. Es verkehrt eine neue Linie S61 Herrenberg - Böblingen - Renningen bzw. Schwabstraße, in Abschnitt Herrenberg - Böblingen in den Fahrzeiten der S1, im Abschnitt Böblingen - Renningen bzw. Schwabstraße in den Fahrzeiten der S60. Bitte prüfen Sie vorab Ihre Verbindungen in der Fahrplanauskunft. Im Regionalverkehr entfallen die Züge der R7 zwischen Stuttgart Hbf und Böblingen, Ausnahme: der Zug Böblingen ab 19:21 Uhr wird umgeleitet und erreicht Stuttgart Hbf um 19:58 Uhr. Die IC-Züge werden zwischen Stuttgart Hbf und Böblingen umgeleitet. Dadurch verlängert sich die Fahrzeit um bis zu 30 Minuten.\n \nVom 14. September 01:30 Uhr bis 16. September 04:30 Uhr ist die Strecke Rohr - Flughafen/Messe nur eingleisig befahrbar. Die S2 fährt nur zwischen Schorndorf und Vaihingen. Die S3 wird durch die Baustellenlinie S30 ersetzt, diese fährt in den Fahrzeiten der S3 zwischen Backnang und Flughafen/Messe und wird bis Filderstadt verlängert. ++ Die beschriebenen Fahrplanänderungen sind <b>nicht in EFA</b> erfasst. ++++ Böblingen - Herrenberg: Verspätungen wegen Bauarbeiten ++ Linie S1 ++ Wegen Bauarbeiten steht in den Nächten 4./5., 5./6. und 10./11. September 2019 zwischen Böblingen und Gärtringen nur ein Gleis zur Verfügung. Daher kommt es bei den Zügen Böblingen ab 00:59 und 01:29 Uhr bis Herrenberg zu Verspätungen von 5 Minuten. ++ Die beschriebenen Fahrplanänderungen sind <b>nicht in EFA</b> erfasst.",
+         line_name: "S-Bahn",
+         line_number: "S1",
+         line_start: "Kirchheim (T)",
+         line_type: "S-Bahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 3",
+         line_arrival_platform_number: "3",
+         line_arrival_time: #DateTime<2019-09-06 22:11:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:11:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0, 
+         line_direction: "Horb (N)",
+         line_info: "Vaihingen: Fahrplanänderungen wegen Bauarbeiten, Bauphase 3 ++ Linien IC, R7, S1, S2, S3 ++ Von Freitag, 30. August 04:30 Uhr bis Montag, 16. September 2019 04:30 Uhr werden in Vaihingen und Rohr Gleise und Weichen in der Bauphase 3 ausgetauscht. Es kommt zu folgenden Fahrplanänderungen:\n\nVom 30. August bis 13. September (nur montags bis freitags) fährt die S1 nur alle 30 Minuten zwischen Kirchheim (T) und Herrenberg. Die Zwischentaktzüge, die den 15-Minuten-Takt bilden, fahren nur zwischen Plochingen und Vaihingen.\n \nAn den Wochenenden 31. August 01:30 Uhr bis 2. September 04:30 Uhr und 7. September 01:30 bis 9. September 04:30 Uhr wird die Strecke Rohr - Böblingen komplett gesperrt. Die S1 fährt nur zwischen Kirchheim (T) und Vaihingen. Zwischen Vaihingen und Böblingen, im Spät- und Nachtverkehr bis Herrenberg, werden Ersatzbusse eingesetzt. Die Ersatzbusse halten nicht in Rohr. Statt am Goldberg halten die Busse in Böblingen Freibad. Es verkehrt eine neue Linie S61 Herrenberg - Böblingen - Renningen bzw. Schwabstraße, in Abschnitt Herrenberg - Böblingen in den Fahrzeiten der S1, im Abschnitt Böblingen - Renningen bzw. Schwabstraße in den Fahrzeiten der S60. Bitte prüfen Sie vorab Ihre Verbindungen in der Fahrplanauskunft. Im Regionalverkehr entfallen die Züge der R7 zwischen Stuttgart Hbf und Böblingen, Ausnahme: der Zug Böblingen ab 19:21 Uhr wird umgeleitet und erreicht Stuttgart Hbf um 19:58 Uhr. Die IC-Züge werden zwischen Stuttgart Hbf und Böblingen umgeleitet. Dadurch verlängert sich die Fahrzeit um bis zu 30 Minuten.\n \nVom 14. September 01:30 Uhr bis 16. September 04:30 Uhr ist die Strecke Rohr - Flughafen/Messe nur eingleisig befahrbar. Die S2 fährt nur zwischen Schorndorf und Vaihingen. Die S3 wird durch die Baustellenlinie S30 ersetzt, diese fährt in den Fahrzeiten der S3 zwischen Backnang und Flughafen/Messe und wird bis Filderstadt verlängert. ++ Die beschriebenen Fahrplanänderungen sind <b>nicht in EFA</b> erfasst.",
+         line_name: "R-Bahn",
+         line_number: "R7",
+         line_start: "Stuttgart Hauptbahnhof (oben)",
+         line_type: "Zug"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 4",
+         line_arrival_platform_number: "4",
+         line_arrival_time: #DateTime<2019-09-06 22:11:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:11:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Leinfelden Bf",
+         line_info: "",
+         line_name: "Stadtbahn",
+         line_number: "U5",
+         line_start: "Killesberg",
+         line_type: "Stadtbahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 3",
+         line_arrival_platform_number: "3",
+         line_arrival_time: #DateTime<2019-09-06 22:12:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:12:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Mönchfeld",
+         line_info: "",
+         line_name: "Stadtbahn",
+         line_number: "U7",
+         line_start: "Nellingen Ostfildern",
+         line_type: "Stadtbahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "",
+         line_arrival_platform_number: "4",
+         line_arrival_time: #DateTime<2019-09-06 22:14:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:14:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Schlossplatz",
+         line_info: "Stuttgart-Mitte: Haltestelle Staatsgalerie verlegt ++ Linien 42, N4, N6, N9 ++ Bis auf Weiteres ist die Haltestelle Staatsgalerie der Linie 42 (Position 2 und 3), sowie die Nachtbushaltestelle Staatsgalerie der Linien N4, N6 (Position 4) und N9 (Position 3) wegen Bauarbeiten verlegt.\n\nErsatzhaltestellen: \nDie Bushaltestelle Staatsgalerie (Position 2) der Buslinie 42 Richtung Erwin-Schoettle-Platz wird in die Landhausstraße zwischen die Gebäude Nr. 1 und 3 bergaufwärts verlegt. \nDie Bushaltestelle Staatsgalerie (Position 3) der Buslinie 42 Richtung Schlossplatz und N9 Richtung Rohrer Höhe wird zur Landhausstraße Nr. 2 bergaufwärts verlegt. \nDie Nachtbushaltestelle Staatsgalerie (Position 4) der Nachtbuslinien N4 und N6 wird um etwa 15 Meter zurückverlegt.\n\nHinweis für mobilitätseingeschränkte Fahrgäste: \nAufgrund der Haltestellenverlegung bergauf und der Baustellensituation empfehlen wir für einen einfachen Zu- und Umstieg zum Bus die Haltestellen Ostendplatz und Hauptbahnhof (Arnulf-Klett-Platz). ++ Die beschriebenen Fahrplanänderungen sind <b>nicht in EFA</b> erfasst. ++++ Stuttgart: Haltestelle Schwabstraße verlegt ++ Linien 42, N10 ++ Von Mittwoch, 28. August 2019 ab 08:00 Uhr bis voraussichtlich Freitag, 27. September 2019 kann die Haltestelle Stuttgart, Schwabstraße von den Buslinien 42 und N10 aufgrund von Bauarbeiten nicht angefahren werden. \n\nErsatzhaltestelle:  \n- Die Haltestelle Schwabstraße Richtung Schlossplatz wird für die Dauer des barrierefreien Ausbaus um etwa 100 Meter zur Busspur vor Gebäude Schwabstraße 20 zurückverlegt (vor der Kreuzung mit der Rotebühlstraße). \n- Die Haltestelle Schwabstraße Richtung Erwin-Schoettle-Platz / Rohr wird dauerhaft an den neuen Standort der Haltestelle nach der Kreuzung mit der Rotebühlstraße, vor der DHBW, gegenüber von Gebäude Schwabstraße 22/24, verlegt. ++ ",
+         line_name: "Bus",
+         line_number: "42",
+         line_start: "Erwin-Schoettle-Platz",
+         line_type: "Bus"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 101",
+         line_arrival_platform_number: "101",
+         line_arrival_time: #DateTime<2019-09-06 22:13:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:14:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 1,
+         line_direction: "Schwabstraße",
+         line_info: "",
+         line_name: "S-Bahn",
+         line_number: "S6",
+         line_start: "Weil der Stadt",
+         line_type: "S-Bahn" 
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "",
+         line_arrival_platform_number: "3",
+         line_arrival_time: #DateTime<2019-09-06 22:15:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:15:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Vogelsang",
+         line_info: "Stuttgart: Umleitung wegen Bauarbeiten ++ Linie 40 ++ Terminänderung: \nSeit  Donnerstag, 05. September 2019 ab 07:00 Uhr noch bis 07.09.2019, 12:00 Uhr wird die Buslinie 40 in Richtung Wagenburgstraße aufgrund von Bauarbeiten umgeleitet.\nDie Haltestellen Stuttgart, Nikolauspflege bis Stuttgart, Leibnizstraße können nicht angefahren werden. \nErsatzhaltestellen:  \n- Die Haltestelle Nikolauspflege in Fahrtrichtung Wagenburgstraße wird zu einer Ersatzhaltestelle in der Gaußstraße, auf Höhe Gebäude 111 verlegt. \n- Die Haltestelle Geibelstraße in Fahrtrichtung Wagenburgstraße wird zu einer Ersatzhaltestelle in der Gaußstraße, auf Höhe Gebäude 69 verlegt (Der Fußweg zu dieser Ersatzhaltestelle ist nicht barrierefrei)\n- Die Haltestellen Kräherwald und Leibnizstraße in Fahrtrichtung Wagenburgstraße werden zur Haltestelle Gaußstraße verlegt.\n\nAlternativ kann ab den entfalllenden Haltestellen jeweils der Bus der Gegenrichtung bis zur Haltestelle Botnanger Sattel genutzt werden und dort Richtung Hauptbahnhof - Wagenburgstraße umgestiegen werden.\n\nIn Fahrtrichtung Vogelsang fahren die Busse über die reguläre Strecke und bedienen alle Haltestellen wie gewohnt. ++ ",
+         line_name: "Bus",
+         line_number: "40",
+         line_start: "Wagenburgstraße",
+         line_type: "Bus"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 4",
+         line_arrival_platform_number: "4",
+         line_arrival_time: #DateTime<2019-09-06 22:15:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:15:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Nellingen Ostfildern",
+         line_info: "",
+         line_name: "Stadtbahn",
+         line_number: "U7",
+         line_start: "Mönchfeld",
+         line_type: "Stadtbahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 1",
+         line_arrival_platform_number: "1",
+         line_arrival_time: #DateTime<2019-09-06 22:15:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:15:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Mühlhausen (Stgt.)",
+         line_info: "Stuttgart-Mitte: Haltepunkte an der Haltestelle Börsenplatz verlegt ++ Linien U11, U14, U29 ++ Die Haltepositionen der Stadtbahnen werden ab Freitag, 12. Oktober 2018 bis auf weiteres verschoben. Grund dafür sind Bauarbeiten am Bahnsteig. Die Bahnen halten in den hinteren Bereichen der Haltestelle, die nicht von den Umbaumaßnahmen betroffen sind. ++ Die beschriebenen Fahrplanänderungen sind <b>nicht in EFA</b> erfasst.",
+         line_name: "Stadtbahn",
+         line_number: "U14",
+         line_start: "Hauptbf (A.-Klett-Pl.)",
+         line_type: "Stadtbahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 101",
+         line_arrival_platform_number: "101",
+         line_arrival_time: #DateTime<2019-09-06 22:15:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:15:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Flughafen/Messe",
+         line_info: "Vaihingen: Fahrplanänderungen wegen Bauarbeiten, Bauphase 3 ++ Linien IC, R7, S1, S2, S3 ++ Von Freitag, 30. August 04:30 Uhr bis Montag, 16. September 2019 04:30 Uhr werden in Vaihingen und Rohr Gleise und Weichen in der Bauphase 3 ausgetauscht. Es kommt zu folgenden Fahrplanänderungen:\n\nVom 30. August bis 13. September (nur montags bis freitags) fährt die S1 nur alle 30 Minuten zwischen Kirchheim (T) und Herrenberg. Die Zwischentaktzüge, die den 15-Minuten-Takt bilden, fahren nur zwischen Plochingen und Vaihingen.\n \nAn den Wochenenden 31. August 01:30 Uhr bis 2. September 04:30 Uhr und 7. September 01:30 bis 9. September 04:30 Uhr wird die Strecke Rohr - Böblingen komplett gesperrt. Die S1 fährt nur zwischen Kirchheim (T) und Vaihingen. Zwischen Vaihingen und Böblingen, im Spät- und Nachtverkehr bis Herrenberg, werden Ersatzbusse eingesetzt. Die Ersatzbusse halten nicht in Rohr. Statt am Goldberg halten die Busse in Böblingen Freibad. Es verkehrt eine neue Linie S61 Herrenberg - Böblingen - Renningen bzw. Schwabstraße, in Abschnitt Herrenberg - Böblingen in den Fahrzeiten der S1, im Abschnitt Böblingen - Renningen bzw. Schwabstraße in den Fahrzeiten der S60. Bitte prüfen Sie vorab Ihre Verbindungen in der Fahrplanauskunft. Im Regionalverkehr entfallen die Züge der R7 zwischen Stuttgart Hbf und Böblingen, Ausnahme: der Zug Böblingen ab 19:21 Uhr wird umgeleitet und erreicht Stuttgart Hbf um 19:58 Uhr. Die IC-Züge werden zwischen Stuttgart Hbf und Böblingen umgeleitet. Dadurch verlängert sich die Fahrzeit um bis zu 30 Minuten.\n \nVom 14. September 01:30 Uhr bis 16. September 04:30 Uhr ist die Strecke Rohr - Flughafen/Messe nur eingleisig befahrbar. Die S2 fährt nur zwischen Schorndorf und Vaihingen. Die S3 wird durch die Baustellenlinie S30 ersetzt, diese fährt in den Fahrzeiten der S3 zwischen Backnang und Flughafen/Messe und wird bis Filderstadt verlängert. ++ Die beschriebenen Fahrplanänderungen sind <b>nicht in EFA</b> erfasst.",
+         line_name: "S-Bahn",
+         line_number: "S3",
+         line_start: "Backnang",
+         line_type: "S-Bahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 4",
+         line_arrival_platform_number: "4",
+         line_arrival_time: #DateTime<2019-09-06 22:15:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:15:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Neckarsulm",
+         line_info: "",
+         line_name: "R-Bahn",
+         line_number: "R4",
+         line_start: "Stuttgart Hauptbahnhof (oben)",
+         line_type: "Zug"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 3",
+         line_arrival_platform_number: "3",
+         line_arrival_time: #DateTime<2019-09-06 22:16:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:16:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Neckargröningen Remseck",
+         line_info: "",
+         line_name: "Stadtbahn",
+         line_number: "U12",
+         line_start: "Dürrlewang",
+         line_type: "Stadtbahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "",
+         line_arrival_platform_number: "6",
+         line_arrival_time: #DateTime<2019-09-06 22:16:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:16:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Westbahnhof (Schleife)",
+         line_info: "Terminänderung: Stuttgart-Nord: Haltestelle Kunstakademie verlegt ++ Linien 44, N2 ++ Terminänderung: Seit Montag, 29. Juli 2019 ab 07:00 Uhr bis nun noch voraussichtlich Freitag, 20. September 2019 kann die Haltestelle Stuttgart, Kunstakademie von den Buslinien 44 und N2 aufgrund von Bauarbeiten nicht angefahren werden.\n \nErsatzhaltestellen: \n- Die Haltestelle Kunstakademie Richtung Killesberg wird an den rechten Fahrbahnrand in der Birkenwaldstraße, vor Einmündung Friedrich-Ebert-Straße verlegt. \n- Die Haltestelle Kunstakademie Richtung Westbahnhof wird in die Straße Am Kochenhof, vor Gebäude 3 verlegt. ++ Die beschriebenen Fahrplanänderungen sind <b>nicht in EFA</b> erfasst. ++++ Stuttgart: Haltestelle Leipziger Platz verlegt ++ Linien 44, N2 ++ Von Donnerstag, 15. August 2019 ab 08:00 Uhr bis voraussichtlich Dienstag, 10. September 2019 kann die Haltestelle Stuttgart, Leipziger Platz von den Buslinien 44 und N2 aufgrund von Bauarbeiten nicht angefahren werden. \n\nErsatzhaltestelle:  \n- Die Haltestelle Leipziger Platz Richtung Killesberg wird entgegen der Fahrtrichtung zu einer Ersatzhaltestelle vor Gebäude  Rotenwaldstraße 41 zurückverlegt. \n- Die Haltestelle Leipziger Platz Richtung Westbahnhof wird zur Haltestelle Seyfferstraße Richtung Westbahnhof verlegt. ++  ++++ Stuttgart: Haltestellen Charlottenplatz - Dorotheenstraße entfallen ++ Linie 44 ++ Von Freitag, 06. September 2019, ab 22:00 Uhr bis Montag, 09. September 2019, 05:00 Uhr entfallen die Haltestellen Stuttgart, Charlottenplatz bis Stuttgart, Dorotheenstraße für die Buslinie 44 in Richtung Westbahnhof (Schleife) aufgrund von Bauarbeiten. \n\nErsatzhaltestellen:  \n- Die Haltestellen Charlottenplatz, Schlossplatz und Dorotheenstraße der Linie 44 Richtung Westbahnhof werden zur Haltestelle Rathaus verlegt.\n- Zwischen Charlottenplatz und Rathaus können die Stadtbahnen der Linien U1, U2, U4, U9 oder U14 genutzt werden.\n- Zwischen Dorotheenstraße und Rathaus können die Busse der Linie 43 genutzt werden. ++ ",
+         line_name: "Bus",
+         line_number: "44",
+         line_start: "Killesberg",
+         line_type: "Bus"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 12",
+         line_arrival_platform_number: "12",
+         line_arrival_time: #DateTime<2019-09-06 22:17:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:17:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Tübingen Hauptbahnhof",
+         line_info: "",
+         line_name: "R-Bahn",
+         line_number: "R8",
+         line_start: "Stuttgart Hauptbahnhof (oben)",
+         line_type: "Zug"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 4",
+         line_arrival_platform_number: "4",
+         line_arrival_time: #DateTime<2019-09-06 22:17:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:17:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Dürrlewang",
+         line_info: "",
+         line_name: "Stadtbahn",
+         line_number: "U12",
+         line_start: "Neckargröningen Remseck",
+         line_type: "Stadtbahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "",
+         line_arrival_platform_number: "5",
+         line_arrival_time: #DateTime<2019-09-06 22:17:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:17:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0, 
+         line_direction: "Killesberg",
+         line_info: "Terminänderung: Stuttgart-Nord: Haltestelle Kunstakademie verlegt ++ Linien 44, N2 ++ Terminänderung: Seit Montag, 29. Juli 2019 ab 07:00 Uhr bis nun noch voraussichtlich Freitag, 20. September 2019 kann die Haltestelle Stuttgart, Kunstakademie von den Buslinien 44 und N2 aufgrund von Bauarbeiten nicht angefahren werden.\n \nErsatzhaltestellen: \n- Die Haltestelle Kunstakademie Richtung Killesberg wird an den rechten Fahrbahnrand in der Birkenwaldstraße, vor Einmündung Friedrich-Ebert-Straße verlegt. \n- Die Haltestelle Kunstakademie Richtung Westbahnhof wird in die Straße Am Kochenhof, vor Gebäude 3 verlegt. ++ Die beschriebenen Fahrplanänderungen sind <b>nicht in EFA</b> erfasst. ++++ Stuttgart: Haltestelle Leipziger Platz verlegt ++ Linien 44, N2 ++ Von Donnerstag, 15. August 2019 ab 08:00 Uhr bis voraussichtlich Dienstag, 10. September 2019 kann die Haltestelle Stuttgart, Leipziger Platz von den Buslinien 44 und N2 aufgrund von Bauarbeiten nicht angefahren werden. \n\nErsatzhaltestelle:  \n- Die Haltestelle Leipziger Platz Richtung Killesberg wird entgegen der Fahrtrichtung zu einer Ersatzhaltestelle vor Gebäude  Rotenwaldstraße 41 zurückverlegt. \n- Die Haltestelle Leipziger Platz Richtung Westbahnhof wird zur Haltestelle Seyfferstraße Richtung Westbahnhof verlegt. ++ ",
+         line_name: "Bus",
+         line_number: "44",
+         line_start: "Westbahnhof (Schleife)",
+         line_type: "Bus"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 102",
+         line_arrival_platform_number: "102",
+         line_arrival_time: #DateTime<2019-09-06 22:18:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:18:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Weil der Stadt",
+         line_info: "",
+         line_name: "S-Bahn",
+         line_number: "S6",
+         line_start: "Schwabstraße",
+         line_type: "S-Bahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "",
+         line_arrival_platform_number: "3",
+         line_arrival_time: #DateTime<2019-09-06 22:18:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:18:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Erwin-Schoettle-Platz",
+         line_info: "Stuttgart-Mitte: Haltestelle Staatsgalerie verlegt ++ Linien 42, N4, N6, N9 ++ Bis auf Weiteres ist die Haltestelle Staatsgalerie der Linie 42 (Position 2 und 3), sowie die Nachtbushaltestelle Staatsgalerie der Linien N4, N6 (Position 4) und N9 (Position 3) wegen Bauarbeiten verlegt.\n\nErsatzhaltestellen: \nDie Bushaltestelle Staatsgalerie (Position 2) der Buslinie 42 Richtung Erwin-Schoettle-Platz wird in die Landhausstraße zwischen die Gebäude Nr. 1 und 3 bergaufwärts verlegt. \nDie Bushaltestelle Staatsgalerie (Position 3) der Buslinie 42 Richtung Schlossplatz und N9 Richtung Rohrer Höhe wird zur Landhausstraße Nr. 2 bergaufwärts verlegt. \nDie Nachtbushaltestelle Staatsgalerie (Position 4) der Nachtbuslinien N4 und N6 wird um etwa 15 Meter zurückverlegt.\n\nHinweis für mobilitätseingeschränkte Fahrgäste: \nAufgrund der Haltestellenverlegung bergauf und der Baustellensituation empfehlen wir für einen einfachen Zu- und Umstieg zum Bus die Haltestellen Ostendplatz und Hauptbahnhof (Arnulf-Klett-Platz). ++ Die beschriebenen Fahrplanänderungen sind <b>nicht in EFA</b> erfasst. ++++ Stuttgart: Haltestelle Schwabstraße verlegt ++ Linien 42, N10 ++ Von Mittwoch, 28. August 2019 ab 08:00 Uhr bis voraussichtlich Freitag, 27. September 2019 kann die Haltestelle Stuttgart, Schwabstraße von den Buslinien 42 und N10 aufgrund von Bauarbeiten nicht angefahren werden. \n\nErsatzhaltestelle:  \n- Die Haltestelle Schwabstraße Richtung Schlossplatz wird für die Dauer des barrierefreien Ausbaus um etwa 100 Meter zur Busspur vor Gebäude Schwabstraße 20 zurückverlegt (vor der Kreuzung mit der Rotebühlstraße). \n- Die Haltestelle Schwabstraße Richtung Erwin-Schoettle-Platz / Rohr wird dauerhaft an den neuen Standort der Haltestelle nach der Kreuzung mit der Rotebühlstraße, vor der DHBW, gegenüber von Gebäude Schwabstraße 22/24, verlegt. ++ ",
+         line_name: "Bus",
+         line_number: "42",
+         line_start: "Schlossplatz",
+         line_type: "Bus"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 3",
+         line_arrival_platform_number: "3",
+         line_arrival_time: #DateTime<2019-09-06 22:19:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:19:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Stammheim",
+         line_info: "",
+         line_name: "Stadtbahn",
+         line_number: "U15",
+         line_start: "Ruhbank (Fernsehturm)",
+         line_type: "Stadtbahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 13",
+         line_arrival_platform_number: "13",
+         line_arrival_time: #DateTime<2019-09-06 22:20:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:20:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Crailsheim",
+         line_info: "",
+         line_name: "R-Bahn",
+         line_number: "RB13",
+         line_start: "Stuttgart Hauptbahnhof (oben)",
+         line_type: "Zug"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 4",
+         line_arrival_platform_number: "4",
+         line_arrival_time: #DateTime<2019-09-06 22:21:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:21:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Ruhbank (Fernsehturm)",
+         line_info: "",
+         line_name: "Stadtbahn",
+         line_number: "U15",
+         line_start: "Stammheim", 
+         line_type: "Stadtbahn"
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 102",
+         line_arrival_platform_number: "102",
+         line_arrival_time: #DateTime<2019-09-06 22:15:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:21:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 6,
+         line_direction: "Backnang",
+         line_info: "Vaihingen: Fahrplanänderungen wegen Bauarbeiten, Bauphase 3 ++ Linien IC, R7, S1, S2, S3 ++ Von Freitag, 30. August 04:30 Uhr bis Montag, 16. September 2019 04:30 Uhr werden in Vaihingen und Rohr Gleise und Weichen in der Bauphase 3 ausgetauscht. Es kommt zu folgenden Fahrplanänderungen:\n\nVom 30. August bis 13. September (nur montags bis freitags) fährt die S1 nur alle 30 Minuten zwischen Kirchheim (T) und Herrenberg. Die Zwischentaktzüge, die den 15-Minuten-Takt bilden, fahren nur zwischen Plochingen und Vaihingen.\n \nAn den Wochenenden 31. August 01:30 Uhr bis 2. September 04:30 Uhr und 7. September 01:30 bis 9. September 04:30 Uhr wird die Strecke Rohr - Böblingen komplett gesperrt. Die S1 fährt nur zwischen Kirchheim (T) und Vaihingen. Zwischen Vaihingen und Böblingen, im Spät- und Nachtverkehr bis Herrenberg, werden Ersatzbusse eingesetzt. Die Ersatzbusse halten nicht in Rohr. Statt am Goldberg halten die Busse in Böblingen Freibad. Es verkehrt eine neue Linie S61 Herrenberg - Böblingen - Renningen bzw. Schwabstraße, in Abschnitt Herrenberg - Böblingen in den Fahrzeiten der S1, im Abschnitt Böblingen - Renningen bzw. Schwabstraße in den Fahrzeiten der S60. Bitte prüfen Sie vorab Ihre Verbindungen in der Fahrplanauskunft. Im Regionalverkehr entfallen die Züge der R7 zwischen Stuttgart Hbf und Böblingen, Ausnahme: der Zug Böblingen ab 19:21 Uhr wird umgeleitet und erreicht Stuttgart Hbf um 19:58 Uhr. Die IC-Züge werden zwischen Stuttgart Hbf und Böblingen umgeleitet. Dadurch verlängert sich die Fahrzeit um bis zu 30 Minuten.\n \nVom 14. September 01:30 Uhr bis 16. September 04:30 Uhr ist die Strecke Rohr - Flughafen/Messe nur eingleisig befahrbar. Die S2 fährt nur zwischen Schorndorf und Vaihingen. Die S3 wird durch die Baustellenlinie S30 ersetzt, diese fährt in den Fahrzeiten der S3 zwischen Backnang und Flughafen/Messe und wird bis Filderstadt verlängert. ++ Die beschriebenen Fahrplanänderungen sind <b>nicht in EFA</b> erfasst.",
+         line_name: "S-Bahn",
+         line_number: "S3",
+         line_start: "Flughafen/Messe",
+         ...
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 2",
+         line_arrival_platform_number: "2",
+         line_arrival_time: #DateTime<2019-09-06 22:22:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:22:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Tübingen Hauptbahnhof",
+         line_info: "",
+         line_name: "R-Bahn",
+         line_number: "R8",
+         ...
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 3",
+         line_arrival_platform_number: "3",
+         line_arrival_time: #DateTime<2019-09-06 22:22:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:22:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Gerlingen",
+         line_info: "",
+         line_name: "Stadtbahn",
+         ...
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "",
+         line_arrival_platform_number: "4",
+         line_arrival_time: #DateTime<2019-09-06 22:23:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:23:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         line_direction: "Wagenburgstraße",
+         line_info: "Stuttgart: Haltestellenausfälle wegen Baumfällarbeiten ++ Linien 40, N2 ++ Aufgrund von Baumfällarbeiten werden die Linien 40 Richtung Wagenburgstraße und N2 Richtung Killesberg von Donnerstag, 5. September, 07:00 Uhr bis Samstag, 7. September, 19:00 Uhr umgeleitet.\n \nDie folgenden Haltestellen entfallen ersatzlos: \n\n\nLinie 40, nur Fahrtrichtung Wagenburgstraße: Haltestellen Geibelstraße, Kräherwald und Leibnizstraße\nLinie N2 Richtung Killesberg: Haltestellen Honoldweg, Fichtestraße, Gaußstraße, Leibnizstraße und Kräherwald ++ Die beschriebenen Fahrplanänderungen sind <b>nicht in EFA</b> erfasst. ++++ Stuttgart: Umleitung wegen Bauarbeiten ++ Linie 40 ++ Terminänderung: \nSeit  Donnerstag, 05. September 2019 ab 07:00 Uhr noch bis 07.09.2019, 12:00 Uhr wird die Buslinie 40 in Richtung Wagenburgstraße aufgrund von Bauarbeiten umgeleitet.\nDie Haltestellen Stuttgart, Nikolauspflege bis Stuttgart, Leibnizstraße können nicht angefahren werden. \nErsatzhaltestellen:  \n- Die Haltestelle Nikolauspflege in Fahrtrichtung Wagenburgstraße wird zu einer Ersatzhaltestelle in der Gaußstraße, auf Höhe Gebäude 111 verlegt. \n- Die Haltestelle Geibelstraße in Fahrtrichtung Wagenburgstraße wird zu einer Ersatzhaltestelle in der Gaußstraße, auf Höhe Gebäude 69 verlegt (Der Fußweg zu dieser Ersatzhaltestelle ist nicht barrierefrei)\n- Die Haltestellen Kräherwald und Leibnizstraße in Fahrtrichtung Wagenburgstraße werden zur Haltestelle Gaußstraße verlegt.\n\nAlternativ kann ab den entfalllenden Haltestellen jeweils der Bus der Gegenrichtung bis zur Haltestelle Botnanger Sattel genutzt werden und dort Richtung Hauptbahnhof - Wagenburgstraße umgestiegen werden.\n\nIn Fahrtrichtung Vogelsang fahren die Busse über die reguläre Strecke und bedienen alle Haltestellen wie gewohnt. ++ ",
+         ...
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 4",
+         line_arrival_platform_number: "4",
+         line_arrival_time: #DateTime<2019-09-06 22:23:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:23:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0, 
+         line_direction: "Fasanenhof Schelmenwasen",
+         ...
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 1",
+         line_arrival_platform_number: "1",
+         line_arrival_time: #DateTime<2019-09-06 22:23:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:23:00+02:00 CEST Europe/Berlin>,
+         line_delayed_min: 0,
+         ...
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 101",
+         line_arrival_platform_number: "101",
+         line_arrival_time: #DateTime<2019-09-06 22:23:00+02:00 CEST Europe/Berlin>,
+         line_arrival_time_actual: #DateTime<2019-09-06 22:23:00+02:00 CEST Europe/Berlin>,
+         ...
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 3",
+         line_arrival_platform_number: "3",
+         line_arrival_time: #DateTime<2019-09-06 22:25:00+02:00 CEST Europe/Berlin>,
+         ...
+       },
+       %EfaMonitor.DmCore.ServiceLine{
+         line_arrival_platform_name: "Gleis 101",
+         line_arrival_platform_number: "101",
+         ...
+       }
+     ],
+     station_name: "Stuttgart, Hauptbahnhof (tief)",
+     station_service_alerts: ""
+   }}}}
+:ok    
 ```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/efa_core](https://hexdocs.pm/efa_core).
-
