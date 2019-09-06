@@ -1,10 +1,26 @@
-defmodule EfaMonitor.DmCore.EfaService.TransportService do
-  alias EfaMonitor.DmCore.EfaService.TransportService.DepartureMonitorHttpRequest, as: DMRequest
-  alias EfaMonitor.DmCore.EfaService.ServiceLine
-  use GenServer
-  require Logger
+defmodule EfaMonitor.DmCore.TransportService do
+  @moduledoc """
+  the process responsible for calling the rest endpoint of the transport service. the process is especially calls the departure monitor endpoint and is not expected to call anyother api. the process works on 'async' calls, i.e., accepts only casts and will ignore any other messages
 
-  defstruct [:service_name, :scheme, :host, :api_path, requests: []]
+  the type specs is as follows:
+  request:
+    {pid, dm_request_type,DepartureMonitorHttpRequest.t }
+
+  response:
+    {dm_request_type, service_name, dm_response}
+
+  """
+  @type dm_request_type :: {:raw, :lines}
+  @type service_name :: atom
+  @type dm_response ::
+          {:ok, map()}
+          | {:error, :retry}
+          | {:error, {:station_not_found, list_of_suggestions :: list(String.t())}}
+          | {:error, reason :: binary}
+  alias EfaMonitor.DmCore.ServiceLine
+  alias EfaMonitor.DmCore.TransportService.DepartureMonitorHttpRequest, as: DMRequest
+  require Logger
+  use GenServer
 
   def start_link([], {service_name, {service_schema, service_host, service_api_path}}) do
     GenServer.start_link(
@@ -16,12 +32,12 @@ defmodule EfaMonitor.DmCore.EfaService.TransportService do
 
   @impl true
   def init({service_name, scheme, host, path}) do
-    state = %__MODULE__{api_path: path, scheme: scheme, host: host, service_name: service_name}
+    state = %{api_path: path, scheme: scheme, host: host, service_name: service_name}
     {:ok, state}
   end
 
   @impl true
-  def handle_cast({from, :raw, request = %DMRequest{}}, state) do
+  def handle_cast({from, :raw, request = %DMRequest{}}, state) when is_pid(from) do
     state = %{state | requests: [from | state.requests]}
     {state, resp} = process_request(state, request)
     GenServer.cast(from, {:raw, state.service_name, resp})
@@ -29,7 +45,7 @@ defmodule EfaMonitor.DmCore.EfaService.TransportService do
   end
 
   @impl true
-  def handle_cast({from, :lines, request = %DMRequest{}}, state) do
+  def handle_cast({from, :lines, request = %DMRequest{}}, state) when is_pid(from) do
     state = %{state | requests: [from | state.requests]}
 
     {state, resp} = process_request(state, request)
@@ -44,6 +60,18 @@ defmodule EfaMonitor.DmCore.EfaService.TransportService do
       end
 
     GenServer.cast(from, {:lines, state.service_name, resp})
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_cast(_ignored_message, state) do
+    # nothing to do here move on --
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_call(_ignored_message, _from, state) do
+    # nothing to do here move on --
     {:noreply, state}
   end
 
@@ -96,9 +124,9 @@ defmodule EfaMonitor.DmCore.EfaService.TransportService do
   defp get_lines(result_points, _) when is_list(result_points) do
     {
       :error,
-      :station_not_found,
-      result_points
-      |> Enum.map(fn point -> point["name"] end)
+      {:station_not_found,
+       result_points
+       |> Enum.map(fn point -> point["name"] end)}
     }
   end
 
@@ -106,7 +134,7 @@ defmodule EfaMonitor.DmCore.EfaService.TransportService do
     {
       :ok,
       lines
-      |> Enum.map(&ServiceLine.get_line/1)
+      |> Enum.map(&ServiceLine.to_service_line/1)
       |> Enum.sort(fn l1, l2 ->
         Timex.compare(l1.line_arrival_time_actual, l2.line_arrival_time_actual, :minutes) < 0
       end)

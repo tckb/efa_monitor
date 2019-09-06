@@ -27,6 +27,7 @@ defmodule EfaMonitor.MixProject do
 
   defp deps do
     [
+      {:ex_doc, "~> 0.21", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0.0-rc.6", only: [:dev, :test]},
       {:credo, "~> 1.1"},
       {:excoveralls, "~> 0.10", only: :test}
@@ -35,7 +36,8 @@ defmodule EfaMonitor.MixProject do
 
   defp aliases do
     [
-      quality: ["format", "dialyzer", "credo --strict", "test", "coveralls"]
+      quality: ["format", "dialyzer", "credo --strict"],
+      test: ["test", "coveralls"]
     ]
   end
 end

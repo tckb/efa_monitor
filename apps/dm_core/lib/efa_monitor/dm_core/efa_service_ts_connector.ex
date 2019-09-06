@@ -1,14 +1,14 @@
-defmodule EfaMonitor.DmCore.EfaService.TransportService.ServiceConnector do
+defmodule EfaMonitor.DmCore.TransportService.ServiceConnector do
   @moduledoc """
   The main enttypooint to the efa core. This is the mains service which is responsible to connect and dispatch the messages to the corresponding transport service process. The supported transport services are listed in the configuration
   """
-  alias EfaMonitor.DmCore.EfaService.TransportService.DepartureMonitorHttpRequest, as: DMRequest
-  alias EfaMonitor.DmCore.EfaService.TransportService.Supervisor, as: EfaServiceSupervisor
+  @type request_type :: {:raw, :lines}
+
+  alias EfaMonitor.DmCore.TransportService.DepartureMonitorHttpRequest, as: DMRequest
+  alias EfaMonitor.DmCore.TransportService.Supervisor, as: EfaServiceSupervisor
   use GenServer
   require Logger
   @service_config Application.get_env(:dm_core, :api)
-
-  @type request_type :: {:raw, :lines}
 
   @doc """
   sends the request  to the corresponding transport service

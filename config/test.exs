@@ -2,7 +2,7 @@ use Mix.Config
 
 # api configs for the transport authority in Germany
 # dm: departure monitor
-config :efa, :api, %{
+config :dm_core, :api, %{
   vrr: %{
     scheme: :http,
     host: "efa.vrr.de",

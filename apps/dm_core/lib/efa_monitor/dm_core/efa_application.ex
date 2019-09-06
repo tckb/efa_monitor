@@ -5,8 +5,8 @@ defmodule EfaMonitor.DmCore.Application do
   @spec start(any, any) :: {:error, any} | {:ok, pid}
   def start(_type, _args) do
     children = [
-      {EfaMonitor.DmCore.EfaService.TransportService.Supervisor, []},
-      {EfaMonitor.DmCore.EfaService.TransportService.ServiceConnector, []}
+      {EfaMonitor.DmCore.TransportService.Supervisor, []},
+      {EfaMonitor.DmCore.TransportService.ServiceConnector, []}
     ]
 
     opts = [strategy: :one_for_one, name: EfaMonitor.DmCore.Supervisor]
