@@ -21,7 +21,8 @@ defmodule EfaMonitor.DmCore.ServiceLine do
           line_start: String.t(),
           line_delayed_min: pos_integer,
           line_arrival_platform_number: pos_integer,
-          line_arrival_platform_name: String.t()
+          line_arrival_platform_name: String.t(),
+          line_info: String.t()
         }
   require Logger
 
@@ -48,7 +49,8 @@ defmodule EfaMonitor.DmCore.ServiceLine do
             line_start: nil,
             line_delayed_min: 0,
             line_arrival_platform_number: 0,
-            line_arrival_platform_name: nil
+            line_arrival_platform_name: nil,
+            line_info: nil
 
   @doc """
   converts the departure line into the serving line
@@ -99,7 +101,8 @@ defmodule EfaMonitor.DmCore.ServiceLine do
       line_arrival_platform_number: departure_line["platform"],
       line_arrival_platform_name: departure_line["platformName"],
       line_arrival_time_actual: actual_arrival_time,
-      line_arrival_time: arrival_time
+      line_arrival_time: arrival_time,
+      line_info: get_service_alerts(departure_line["lineInfos"])
     }
   rescue
     some_error ->
@@ -109,4 +112,30 @@ defmodule EfaMonitor.DmCore.ServiceLine do
 
       %__MODULE__{}
   end
+
+  defp get_service_alerts(alerts) when not is_nil(alerts) and is_list(alerts) do
+    alerts
+    |> Enum.map(&get_service_alerts/1)
+    |> Enum.filter(fn alert -> String.length(alert) > 0 end)
+    |> Enum.join(" ++++ ")
+  end
+
+  defp get_service_alerts(alert = %{"lineInfo" => line_info})
+       when not is_nil(alert) and is_map(alert) do
+    get_service_alerts(line_info)
+  end
+
+  defp get_service_alerts(alert) when not is_nil(alert) and is_map(alert) do
+    if alert["infoLinkText"] == nil do
+      Logger.debug("got alert: #{inspect(alert)}")
+    end
+
+    alert_info = alert["infoText"]
+
+    "#{alert["infoLinkText"]} ++ #{alert_info["subject"]} ++ #{alert_info["content"]} ++ #{
+      alert_info["additionalText"]
+    }"
+  end
+
+  defp get_service_alerts(_), do: ""
 end

@@ -60,13 +60,26 @@ defmodule EfaMonitor.DmCore.TransportService do
     resp =
       case resp do
         {:ok, rawdata} ->
-          Logger.debug("received response: #{inspect(rawdata["dm"])}")
+          Logger.debug("received response: #{inspect(rawdata)}")
 
-          %{
-            station_name: rawdata["dm"]["points"]["point"]["name"],
-            station_service_alerts: get_service_alerts(rawdata["dm"]["points"]["point"]["infos"]),
-            station_lines: get_lines(rawdata["dm"]["points"], rawdata["departureList"])
-          }
+          try do
+            case get_lines(rawdata["dm"]["points"], rawdata["departureList"]) do
+              {:error, station_suggestions} ->
+                {:error, :station_not_found, station_suggestions}
+
+              lines ->
+                {:ok,
+                 %{
+                   station_name: rawdata["dm"]["points"]["point"]["name"],
+                   station_service_alerts:
+                     get_service_alerts(rawdata["dm"]["points"]["point"]["infos"]),
+                   station_lines: lines
+                 }}
+            end
+          rescue
+            ArgumentError ->
+              {:error, :station_not_found}
+          end
 
         {:error, some_error} ->
           {:error, some_error}
@@ -134,23 +147,17 @@ defmodule EfaMonitor.DmCore.TransportService do
   end
 
   defp get_lines(result_points, _) when is_list(result_points) do
-    {
-      :error,
-      {:station_not_found,
-       result_points
-       |> Enum.map(fn point -> point["name"] end)}
-    }
+    {:error,
+     result_points
+     |> Enum.map(fn point -> point["name"] end)}
   end
 
   defp get_lines(result_points, lines) when is_map(result_points) do
-    {
-      :ok,
-      lines
-      |> Enum.map(&ServiceLine.to_service_line/1)
-      |> Enum.sort(fn l1, l2 ->
-        Timex.compare(l1.line_arrival_time_actual, l2.line_arrival_time_actual, :minutes) < 0
-      end)
-    }
+    lines
+    |> Enum.map(&ServiceLine.to_service_line/1)
+    |> Enum.sort(fn l1, l2 ->
+      Timex.compare(l1.line_arrival_time_actual, l2.line_arrival_time_actual, :minutes) < 0
+    end)
   end
 
   defp get_service_alerts(alerts) when not is_nil(alerts) do
