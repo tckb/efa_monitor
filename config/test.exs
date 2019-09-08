@@ -39,3 +39,9 @@ config :dm_core, :api, %{
     }
   }
 }
+config :dm_phoenix_front, EfaMonitor.DmPhxWeb.Endpoint,
+  http: [port: 4002],
+  server: false
+
+# Print only warnings and errors during test
+config :logger, level: :warn
