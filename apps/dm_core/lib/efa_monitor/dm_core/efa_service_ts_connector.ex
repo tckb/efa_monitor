@@ -25,6 +25,7 @@ defmodule EfaMonitor.DmCore.TransportService.ServiceConnector do
       {type,
        {self(), transport_service, %DMRequest{name_dm: station_name, timeOffset: timeOffset}}}
     )
+    :ok
   end
 
   ###########
@@ -45,7 +46,7 @@ defmodule EfaMonitor.DmCore.TransportService.ServiceConnector do
   @impl true
   def handle_cast({request_type, request = {from, transport_service, req = %DMRequest{}}}, state)
       when is_pid(from) do
-    Logger.info("Got :request_dm from #{inspect(from)} req: #{inspect(request)}")
+    Logger.info("Got #{request_type} from #{inspect(from)} req: #{inspect(request)}")
 
     case find_service(transport_service) do
       {:ok, pid} ->

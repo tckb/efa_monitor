@@ -34,9 +34,7 @@ defmodule EfaMonitor.DmCore.TransportService do
   @impl true
   def init({service_name, scheme, host, path}) do
     state = %{
-      api_path: path,
-      scheme: scheme,
-      host: host,
+      api_url: "#{scheme}://#{host}#{path}",
       service_name: service_name,
       requests: []
     }
@@ -77,8 +75,7 @@ defmodule EfaMonitor.DmCore.TransportService do
     resp =
       case resp do
         {:ok, rawdata} ->
-          Logger.debug("received response: #{inspect(rawdata)}")
-
+          Logger.info("got response")
           try do
             case get_lines(rawdata["dm"]["points"], rawdata["departureList"]) do
               {:error, station_suggestions} when is_list(station_suggestions) ->
@@ -103,13 +100,17 @@ defmodule EfaMonitor.DmCore.TransportService do
 
         {:error, :retry} ->
           if request.retry_count > 0 do
-            Logger.warn(fn  -> "Last message failed, retrying #{inspect(request)}" end)
+            Logger.warn(fn -> "Last message failed, retrying #{inspect(request)}" end)
+
             GenServer.cast(
               self(),
               {from, :lines, %{request | retry_count: request.retry_count - 1}}
             )
           else
-            Logger.warn(fn  -> "Max retries exceeded, ignoring this message  #{inspect(dm_req)}" end)
+            Logger.warn(fn ->
+              "Max retries exceeded, ignoring this message  #{inspect(dm_req)}"
+            end)
+
             {:error, :max_retries}
           end
 
@@ -148,20 +149,19 @@ defmodule EfaMonitor.DmCore.TransportService do
     [from | remain] = state.requests
     state = %{state | requests: remain}
     GenServer.cast(from, {:raw, state.service_name, {:error, :retry}})
-     {:noreply, state}
+    {:noreply, state}
   end
 
   @impl true
   def handle_info(message, state) do
-    Logger.info(fn  -> "Unexpected message  #{inspect(message)}" end)
+    Logger.info(fn -> "Unexpected message  #{inspect(message)}" end)
     {:noreply, state}
   end
-
 
   defp process_request(state, request = %DMRequest{}) do
     resp =
       case Mojito.post(
-             "#{state.scheme}://#{state.host}#{state.api_path}",
+             state.api_url,
              [{"Content-Type", "application/x-www-form-urlencoded"}],
              DMRequest.encode(request),
              opts: [
@@ -171,6 +171,7 @@ defmodule EfaMonitor.DmCore.TransportService do
              ]
            ) do
         {:ok, resp = %Mojito.Response{status_code: 200}} ->
+          Logger.debug("received response: #{inspect(resp)}")
           {:ok, Jason.decode!(resp.body)}
 
         {:ok, resp = %Mojito.Response{}} ->

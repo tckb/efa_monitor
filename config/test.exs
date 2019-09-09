@@ -39,6 +39,7 @@ config :dm_core, :api, %{
     }
   }
 }
+
 config :dm_phoenix_front, EfaMonitor.DmPhxWeb.Endpoint,
   http: [port: 4002],
   server: false

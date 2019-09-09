@@ -1,4 +1,5 @@
 use Mix.Config
+
 config :dm_phoenix_front,
   namespace: EfaMonitor.DmPhx
 
@@ -29,4 +30,5 @@ config :dm_scenic_front, :viewport, %{
     }
   ]
 }
+
 import_config "#{Mix.env()}.exs"
