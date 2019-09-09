@@ -103,12 +103,13 @@ defmodule EfaMonitor.DmCore.TransportService do
 
         {:error, :retry} ->
           if request.retry_count > 0 do
+            Logger.warn(fn  -> "Last message failed, retrying #{inspect(request)}" end)
             GenServer.cast(
               self(),
               {from, :lines, %{request | retry_count: request.retry_count - 1}}
             )
           else
-            Logger.warn("Max retries exceeded, ignoring this message  #{inspect(dm_req)}")
+            Logger.warn(fn  -> "Max retries exceeded, ignoring this message  #{inspect(dm_req)}" end)
             {:error, :max_retries}
           end
 
@@ -138,25 +139,24 @@ defmodule EfaMonitor.DmCore.TransportService do
   end
 
   @impl true
-  def handle_info(message, state = %{requests: []}) do
-    case message do
-      {:mojito_response, nil, {:error, some_error}} ->
-        Logger.error("Got error #{some_error}")
-        {:noreply, state}
-    end
+  def handle_info({:mojito_response, nil, {:error, some_error}}, %{requests: []}) do
+    Logger.error("Got error ignoring #{some_error}")
+  end
+
+  @impl true
+  def handle_info({:mojito_response, nil, {:error, _}}, state) do
+    [from | remain] = state.requests
+    state = %{state | requests: remain}
+    GenServer.cast(from, {:raw, state.service_name, {:error, :retry}})
+     {:noreply, state}
   end
 
   @impl true
   def handle_info(message, state) do
-    [from | remain] = state.requests
-    state = %{state | requests: remain}
-
-    case message do
-      {:mojito_response, nil, {:error, _}} ->
-        GenServer.cast(from, {:raw, state.service_name, {:error, :retry}})
-        {:noreply, state}
-    end
+    Logger.info(fn  -> "Unexpected message  #{inspect(message)}" end)
+    {:noreply, state}
   end
+
 
   defp process_request(state, request = %DMRequest{}) do
     resp =
