@@ -16,3 +16,16 @@ import LiveSocket from "phoenix_live_view"
 
 let liveSocket = new LiveSocket("/updates", Socket)
 liveSocket.connect()
+
+var popOverSettings = {
+    trigger: 'hover',
+    placement: 'auto',
+    container: 'body',
+    html: true,
+    selector: '[data-toggle="popover"]', //Sepcify the selector here
+    content: function () {
+        return $('#popover-content').html();
+    }
+}
+
+$('body').popover(popOverSettings);

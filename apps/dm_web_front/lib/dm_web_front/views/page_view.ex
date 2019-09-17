@@ -36,13 +36,13 @@ defmodule EfaMonitor.DmFront.Web.PageView do
       cond do
         mins == 0 ->
           ~E"""
-          <span class="badge badge-success">Now</span>
+          <span class="badge badge-success" data-toggle="popover"  title="Status" data-content="This line is gonna leave now!">Now</span>
           """
           |> safe_to_string()
 
         mins > 0 and mins <= 8 ->
           ~E"""
-          <span class="badge badge-success"><%= mins %></span>
+          <span class="badge badge-success" data-toggle="popover"  title="Status" data-content="This line <b>will</b> arrive in <%= mins %> mins"><%= mins %></span>
           """
           |> safe_to_string()
 
@@ -54,7 +54,7 @@ defmodule EfaMonitor.DmFront.Web.PageView do
       cond do
         line.line_delayed_min > 0 ->
           ~E"""
-          <span class="badge badge-pill badge-warning"><%= line.line_delayed_min %></span>
+          <span class="badge badge-pill badge-warning" data-toggle="popover"  title="Delay Alert" data-content="This line <b>was</b> delayed by <%= line.line_delayed_min %> mins"><%= line.line_delayed_min %></span>
           """
           |> safe_to_string()
 
@@ -71,7 +71,7 @@ defmodule EfaMonitor.DmFront.Web.PageView do
     additional_info =
       if String.length(line.line_info) > 1 do
         ~E"""
-          <i id="popup" data-html="true" data-container="body" data-trigger="hover" data-toggle="popup"    data-placement="top" title="<%= line.line_info %>" class="material-icons md-36" style="vertical-align: bottom; color:  #003399;">info</i>
+          <i id="popup" data-html="true" data-container="body" data-trigger="hover" data-toggle="popover" data-placement="top" title="Line Alert" data-content="<%= line.line_info %>" class="material-icons md-36" style="vertical-align: bottom; color:  #003399;">info</i>
         """
         |> safe_to_string()
       else
