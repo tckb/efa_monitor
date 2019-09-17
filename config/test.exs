@@ -1,5 +1,17 @@
 use Mix.Config
 
+# We don't run a server during test. If one is required,
+# you can enable the server option below.
+config :dm_web_front, EfaMonitor.DmFront.Web.Endpoint,
+  http: [port: 4002],
+  server: false
+
+# We don't run a server during test. If one is required,
+# you can enable the server option below.
+config :dm_phoenix_front, EfaMonitor.DmFront.Phx.Endpoint,
+  http: [port: 4002],
+  server: false
+
 # api configs for the transport authority in Germany
 # dm: departure monitor
 config :dm_core, :api, %{
@@ -39,10 +51,6 @@ config :dm_core, :api, %{
     }
   }
 }
-
-config :dm_phoenix_front, EfaMonitor.DmPhxWeb.Endpoint,
-  http: [port: 4002],
-  server: false
 
 # Print only warnings and errors during test
 config :logger, level: :warn

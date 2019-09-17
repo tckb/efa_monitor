@@ -1,0 +1,72 @@
+<div class="card">
+ <div class="card-header">
+    Choose the station and the transport region
+  </div>
+  <div class="card-body">
+<%= f = form_for @changeset, "#", as: :search_form, class: "form-inline my-1", phx_change: :validate, phx_submit: :search %>
+   <%= text_input f, :transport_region, class: "form-control mr-2 mb-0 input-lg", placeholder: "Region", "aria-label": "Region" %>
+   <%= text_input f, :search_station, class: "form-control  mr-2 mb-0 input-lg", placeholder: "Station", "aria-label": "Station" %>
+   <%= submit "Search", class: "btn btn-outline-white btn my-0 bg-light" %>
+   <%= error_tag f, :transport_region %>
+   <%= error_tag f, :search_station %>
+</form>  </div>
+</div>
+<%= if @waiting_for_response? do %>
+<div class="d-flex justify-content-center">
+  <div class="spinner-grow" style="width: 3rem; height: 3rem;" role="status">
+  <span class="sr-only">Loading...</span>
+</div>
+<% end %>
+</div>
+<br/>
+<div class="alert alert-info" role="alert">
+  <h4 class="alert-heading">Showing for <b><%= @current_departures.station_name %></b></h4>
+  <p><i> <%= raw @current_departures.station_service_alerts %> </i></p><hr>
+  <p class="mb-0"> Last updated @ <%= Timex.format!(@updated_time,"%b %d, %H:%M:%S", :strftime) %></p>
+</div>
+<hr/>
+<table class="table table-striped">
+      <thead class="table-dark sticky-top">
+        <tr>
+          <th>
+            <p class="text-sm-left">
+              <i class="material-icons md-36" style="vertical-align: bottom;">linear_scale</i>
+              Line
+            </p>
+          </th>
+          <th>
+            <p class="text-sm-left">
+              <i class="material-icons md-36" style="vertical-align: bottom;">nature_people</i>
+              Platform
+            </p>
+          </th>
+          <th>
+            <p class="text-sm-left">
+              <i class="material-icons md-36" style="vertical-align: bottom;">access_alarms</i>
+              Departure Time</p>
+          </th>
+          <th>
+            <p class="text-sm-left">
+              <i class="material-icons md-36" style="vertical-align: bottom;">directions</i>
+              Direction</p>
+          </th>
+          </th>
+        </tr>
+      </thead>
+ <tbody>
+      <%= for line <- @current_departures.station_lines do %>
+        <tr>
+              <td>
+              <p class="text-sm-left">
+              <%= raw get_icon(line) %>  
+              <%= line.line_name <>" "<> line.line_number %>
+              </p>
+              </td>
+              <td><%= line.line_arrival_platform_number %></td>
+              <td><%= Timex.format!(line.line_arrival_time_actual,"%H:%M", :strftime) %> 
+              <%= raw get_delay(line) %></td>
+              <td><%= line.line_direction %></td>
+        </tr>        
+      <% end %>
+</tbody>
+</table>

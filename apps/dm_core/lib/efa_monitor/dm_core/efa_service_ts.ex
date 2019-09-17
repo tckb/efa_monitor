@@ -76,6 +76,7 @@ defmodule EfaMonitor.DmCore.TransportService do
       case resp do
         {:ok, rawdata} ->
           Logger.info("got response")
+
           try do
             case get_lines(rawdata["dm"]["points"], rawdata["departureList"]) do
               {:error, station_suggestions} when is_list(station_suggestions) ->
@@ -121,7 +122,7 @@ defmodule EfaMonitor.DmCore.TransportService do
       end
 
     if resp != nil do
-      GenServer.cast(from, {:lines, state.service_name, resp})
+      Process.send(from, {:lines, state.service_name, resp}, [:noconnect])
     end
 
     {:noreply, state}
@@ -140,8 +141,9 @@ defmodule EfaMonitor.DmCore.TransportService do
   end
 
   @impl true
-  def handle_info({:mojito_response, nil, {:error, some_error}}, %{requests: []}) do
+  def handle_info({:mojito_response, nil, {:error, some_error}}, %{requests: [] = state}) do
     Logger.error("Got error ignoring #{some_error}")
+    {:noreply, state}
   end
 
   @impl true

@@ -25,6 +25,7 @@ defmodule EfaMonitor.DmCore.TransportService.ServiceConnector do
       {type,
        {self(), transport_service, %DMRequest{name_dm: station_name, timeOffset: timeOffset}}}
     )
+
     :ok
   end
 

@@ -14,6 +14,7 @@ defmodule EfaMonitor.DmCore.ServiceLine do
   @type t :: %__MODULE__{
           line_name: String.t(),
           line_type: String.t(),
+          line_type_id: String.t(),
           line_number: pos_integer,
           line_direction: String.t(),
           line_arrival_time: DateTime.t(),
@@ -22,7 +23,8 @@ defmodule EfaMonitor.DmCore.ServiceLine do
           line_delayed_min: pos_integer,
           line_arrival_platform_number: pos_integer,
           line_arrival_platform_name: String.t(),
-          line_info: String.t()
+          line_info: String.t(),
+          line_status: String.t()
         }
   require Logger
 
@@ -42,6 +44,7 @@ defmodule EfaMonitor.DmCore.ServiceLine do
 
   defstruct line_name: nil,
             line_type: nil,
+            line_type_id: 0,
             line_number: 0,
             line_direction: nil,
             line_arrival_time: nil,
@@ -50,7 +53,8 @@ defmodule EfaMonitor.DmCore.ServiceLine do
             line_delayed_min: 0,
             line_arrival_platform_number: 0,
             line_arrival_platform_name: nil,
-            line_info: nil
+            line_info: "",
+            line_status: nil
 
   @doc """
   converts the departure line into the serving line
@@ -94,6 +98,7 @@ defmodule EfaMonitor.DmCore.ServiceLine do
     %__MODULE__{
       line_name: serving_line["name"],
       line_type: @transport_types[serving_line["motType"]],
+      line_type_id: serving_line["motType"],
       line_number: serving_line["number"],
       line_direction: serving_line["direction"],
       line_start: serving_line["directionFrom"],
@@ -102,7 +107,8 @@ defmodule EfaMonitor.DmCore.ServiceLine do
       line_arrival_platform_name: departure_line["platformName"],
       line_arrival_time_actual: actual_arrival_time,
       line_arrival_time: arrival_time,
-      line_info: get_service_alerts(departure_line["lineInfos"])
+      line_info: get_service_alerts(departure_line["lineInfos"]),
+      line_status: departure_line["realtimeStatus"]
     }
   rescue
     some_error ->
