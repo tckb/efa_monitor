@@ -1,7 +1,6 @@
 defmodule EfaMonitor.DmFront.Web.PageView do
   use EfaMonitor.DmFront.Web, :view
   alias EfaMonitor.DmCore.ServiceLine, as: TransportLine
-  alias EfaMonitor.DmFront.Router.Helpers, as: Routes
 
   @line_types %{
     "0" => {"train", "#003399"},
