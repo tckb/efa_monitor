@@ -62,7 +62,6 @@ defmodule EfaMonitor.DmFront.Web.DmLive do
   end
 
   def handle_info({:lines, service, {:error, :station_not_found, station_suggestion}}, socket) do
-
     changeset =
       Request.changeset(%{
         transport_region: socket.assigns.current_request.transport_region,
