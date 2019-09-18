@@ -3,7 +3,6 @@ defmodule EfaMonitor.DmFront.Web do
     quote do
       use Phoenix.Controller, namespace: EfaMonitor.DmFront.Web
       import Plug.Conn
-      import EfaMonitor.DmFront.Web.Gettext
       import Phoenix.LiveView.Controller, only: [live_render: 3]
       alias EfaMonitor.DmFront.Web.Router.Helpers, as: Routes
     end
@@ -22,7 +21,6 @@ defmodule EfaMonitor.DmFront.Web do
       use Phoenix.HTML
 
       import EfaMonitor.DmFront.Web.ErrorHelpers
-      import EfaMonitor.DmFront.Web.Gettext
       alias EfaMonitor.DmFront.Web.Router.Helpers, as: Routes
       import Phoenix.LiveView, only: [live_render: 2, live_render: 3]
     end
@@ -39,7 +37,6 @@ defmodule EfaMonitor.DmFront.Web do
   def channel do
     quote do
       use Phoenix.Channel
-      import EfaMonitor.DmFront.Web.Gettext
     end
   end
 
