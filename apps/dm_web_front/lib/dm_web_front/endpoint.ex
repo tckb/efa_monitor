@@ -3,10 +3,6 @@ defmodule EfaMonitor.DmFront.Web.Endpoint do
 
   socket "/updates", Phoenix.LiveView.Socket, websocket: true
 
-  socket "/socket", EfaMonitor.DmFront.Web.UserSocket,
-    websocket: true,
-    longpoll: false
-
   plug Plug.Static,
     at: "/",
     from: :dm_web_front,
