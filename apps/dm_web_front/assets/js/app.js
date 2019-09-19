@@ -29,3 +29,10 @@ var popOverSettings = {
 }
 
 $('body').popover(popOverSettings);
+
+$("#line_filter").on("keyup", function () {
+    var value = $(this).val().toLowerCase();
+    $("#lines tr").filter(function () {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+});

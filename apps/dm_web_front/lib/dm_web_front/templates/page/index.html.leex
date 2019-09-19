@@ -9,6 +9,7 @@
    <%= submit "Search", class: "btn btn-outline-white btn my-0 bg-light" %>
    <%= error_tag f, :transport_region %>
    <%= error_tag f, :search_station %>
+
 </form>  </div>
 </div>
 <%= if @waiting_for_response? do %>
@@ -24,6 +25,8 @@
   <p><i> <%= raw @current_departures.station_service_alerts %> </i></p><hr>
   <p class="mb-0"> Last updated @ <%= Timex.format!(@updated_time,"%b %d, %H:%M:%S", :strftime) %></p>
 </div>
+<hr/>
+<input class="form-control mr-2 mb-0 input-lg <%= if @waiting_for_response?, do: "invisible"  %>" id="line_filter" type="text" placeholder="Filter lines ..." />
 <hr/>
 <table class="table table-striped">
       <thead class="table-dark sticky-top">
@@ -53,7 +56,7 @@
           </th>
         </tr>
       </thead>
- <tbody>
+ <tbody id="lines">
       <%= for line <- @current_departures.station_lines do %>
         <tr>
               <td>
