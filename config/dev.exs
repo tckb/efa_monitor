@@ -33,38 +33,5 @@ config :dm_web_front, EfaMonitor.DmFront.Web.Endpoint,
     ]
   ]
 
-# api configs for the transport authority in Germany
-# dm: departure monitor
-config :dm_core, :api, %{
-  vrr: %{
-    scheme: :http,
-    host: "efa.vrr.de",
-    apis: %{
-      dm: "/standard/XSLT_DM_REQUEST"
-    }
-  },
-  vvs: %{
-    scheme: :http,
-    host: "www2.vvs.de",
-    apis: %{
-      dm: "/vvs/XSLT_DM_REQUEST"
-    }
-  },
-  mvv: %{
-    scheme: :https,
-    host: "efa.mvv-muenchen.de",
-    apis: %{
-      dm: "/mobile/XSLT_DM_REQUEST"
-    }
-  },
-  nvbw: %{
-    scheme: :http,
-    host: "www.efa-bw.de",
-    apis: %{
-      dm: "/nvbw/XSLT_DM_REQUEST"
-    }
-  }
-}
-
 config :logger, :console, format: "[$level] $message\n"
 config :logger, level: :info

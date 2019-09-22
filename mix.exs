@@ -21,6 +21,12 @@ defmodule EfaMonitor.MixProject do
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test
+      ],
+      releases: [
+        web_frontend: [
+          include_executables_for: [:unix],
+          applications: [dm_web_front: :permanent]
+        ]
       ]
     ]
   end
