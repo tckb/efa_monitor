@@ -75,7 +75,7 @@ defmodule EfaMonitor.DmCore.TransportService do
     resp =
       case resp do
         {:ok, rawdata} ->
-          Logger.info("got response")
+          Logger.debug("got response")
 
           try do
             case get_lines(rawdata["dm"]["points"], rawdata["departureList"]) do
@@ -156,7 +156,7 @@ defmodule EfaMonitor.DmCore.TransportService do
 
   @impl true
   def handle_info(message, state) do
-    Logger.info(fn -> "Unexpected message  #{inspect(message)}" end)
+    Logger.warn(fn -> "Unexpected message  #{inspect(message)}" end)
     {:noreply, state}
   end
 

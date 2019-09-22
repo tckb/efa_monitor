@@ -34,4 +34,4 @@ config :dm_web_front, EfaMonitor.DmFront.Web.Endpoint,
   ]
 
 config :logger, :console, format: "[$level] $message\n"
-config :logger, level: :info
+config :logger, level: :debug

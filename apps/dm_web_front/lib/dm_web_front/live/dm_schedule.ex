@@ -113,7 +113,7 @@ defmodule EfaMonitor.DmFront.Web.DmLive do
         socket
       ) do
     changeset = data |> Request.changeset()
-    Logger.info("saving changeset:#{inspect(changeset)}")
+    Logger.debug("saving changeset:#{inspect(changeset)}")
 
     if changeset.valid? do
       # send an  immediate request
@@ -133,7 +133,7 @@ defmodule EfaMonitor.DmFront.Web.DmLive do
   end
 
   defp send_request(%{search_station: station_name, transport_region: transport_region}) do
-    Logger.info("sending request: #{transport_region} #{station_name}")
+    Logger.debug("sending request: #{transport_region} #{station_name}")
     TransportConnector.send_request(:lines, transport_region |> String.to_atom(), station_name)
   end
 end
