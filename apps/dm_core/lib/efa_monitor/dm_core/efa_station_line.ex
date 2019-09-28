@@ -133,14 +133,16 @@ defmodule EfaMonitor.DmCore.ServiceLine do
 
   defp get_service_alerts(alert) when not is_nil(alert) and is_map(alert) do
     if alert["infoLinkText"] == nil do
-      Logger.debug("got alert: #{inspect(alert)}")
+      get_service_alerts(alert["info"])
+    else
+      Logger.debug("got get_service_alerts: #{inspect(alert)}")
+
+      alert_info = alert["infoText"]
+
+      "#{alert["infoLinkText"]} ++ #{alert_info["subject"]} ++ #{alert_info["content"]} ++ #{
+        alert_info["additionalText"]
+      }"
     end
-
-    alert_info = alert["infoText"]
-
-    "#{alert["infoLinkText"]} ++ #{alert_info["subject"]} ++ #{alert_info["content"]} ++ #{
-      alert_info["additionalText"]
-    }"
   end
 
   defp get_service_alerts(_), do: ""

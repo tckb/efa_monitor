@@ -14,6 +14,7 @@ defmodule EfaMonitor.DmCore.TransportService.DepartureMonitorHttpRequest do
           useRealtime: 0..1,
           outputFormat: String.t(),
           lineRestriction: pos_integer()
+          # itdDate: String.t()
         }
   alias EfaMonitor.DmCore.TransportService.DepartureMonitorHttpRequest
 
@@ -28,6 +29,7 @@ defmodule EfaMonitor.DmCore.TransportService.DepartureMonitorHttpRequest do
             useRealtime: 1,
             outputFormat: "json",
             lineRestriction: 400,
+            # itdDate: "20190928",
             retry_count: 5
 
   @doc """
